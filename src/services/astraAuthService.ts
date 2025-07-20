@@ -24,7 +24,6 @@ export class AstraAuthService {
       });
 
       const data = await response.json();
-      await testingFunc()
 
       if(!data.success){
         console.warn("error while Loggging in")
