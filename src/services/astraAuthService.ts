@@ -3,8 +3,8 @@ import { User } from '../types';
 import md5 from 'js-md5';
 
 const userFetch = {
-  username: string
-  name: string
+  username: string,
+  name: string,
   admin: boolean
 }
 export class AstraAuthService {
