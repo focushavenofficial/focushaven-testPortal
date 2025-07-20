@@ -31,8 +31,6 @@ function App() {
     setError(null);
     
     try {
-      await TestService.setUserContext(currentUser.id, currentUser.role);
-      
       const [testsData, resultsData] = await Promise.all([
         TestService.getTests(currentUser.role, currentUser.id),
         TestService.getTestResults(currentUser.role, currentUser.id)

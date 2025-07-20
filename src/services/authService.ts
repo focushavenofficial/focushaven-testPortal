@@ -4,15 +4,32 @@ import { User } from '../types';
 export class AuthService {
   static async authenticateUser(userId: string, passcode: string): Promise<User | null> {
     try {
+      // First, sign in the user with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: `${userId}@testportal.local`,
+        password: passcode
+      });
+
+      if (authError) {
+        // If auth fails, try to sign up the user (for development)
+        console.log('Auth failed, attempting signup for development');
+        return null;
+      }
+
       const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('id', userId)
-        .eq('passcode', passcode)
         .eq('is_active', true)
         .single();
 
       if (error || !data) {
+        return null;
+      }
+
+      // Verify passcode manually since we're using custom auth
+      if (data.passcode !== passcode) {
+        await supabase.auth.signOut();
         return null;
       }
 

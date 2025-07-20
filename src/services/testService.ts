@@ -2,10 +2,6 @@ import { supabase, setUserContext } from '../lib/supabase';
 import { Test, TestResult } from '../types';
 
 export class TestService {
-  static async setUserContext(userId: string, userRole: string) {
-    await setUserContext(userId, userRole);
-  }
-
   static async createTest(test: Omit<Test, 'id' | 'createdAt'>): Promise<Test> {
     const { data, error } = await supabase
       .from('tests')

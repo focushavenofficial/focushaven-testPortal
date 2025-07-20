@@ -48,20 +48,3 @@ try {
 }
 
 export { supabase };
-
-// Set user context for RLS policies
-export const setUserContext = async (userId: string, userRole: string) => {
-  if (supabaseAnonKey !== 'fallback-key') {
-    await supabase.rpc('set_config', {
-      setting_name: 'app.current_user_id',
-      setting_value: userId,
-      is_local: true
-    });
-    
-    await supabase.rpc('set_config', {
-      setting_name: 'app.current_user_role',
-      setting_value: userRole,
-      is_local: true
-    });
-  }
-};
