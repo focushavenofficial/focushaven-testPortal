@@ -1,6 +1,6 @@
 import { User } from '../types';
 import md5 from 'js-md5';
-import { testingFunc } from '../../netlify/functions/get-user.js'
+import testingFunc from '../../netlify/functions/get-user.js'
 
 interface UserFetch {
   username: string,
