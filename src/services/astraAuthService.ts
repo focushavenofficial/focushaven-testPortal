@@ -53,7 +53,7 @@ export class AstraAuthService {
   static async getUserInfo(): Promise<UserFetch | null> {
     try {
       const response = await fetch('https://focushaven-api.vercel.app/api/v1/user/getUserInfo', {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json'
         },
