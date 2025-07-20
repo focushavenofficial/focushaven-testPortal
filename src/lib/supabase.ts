@@ -8,14 +8,20 @@ let supabase;
 try {
   if (supabaseAnonKey === 'fallback-key') {
     console.warn('Supabase environment variables not configured. Using mock client.');
-    // Create a mock Supabase client
+    // Create a comprehensive mock Supabase client
+    const createMockQuery = () => ({
+      select: () => createMockQuery(),
+      eq: () => createMockQuery(),
+      single: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }),
+      order: () => createMockQuery(),
+      insert: () => createMockQuery(),
+      update: () => createMockQuery(),
+      delete: () => createMockQuery(),
+      then: (resolve) => resolve({ data: [], error: new Error('Supabase not configured') })
+    });
+
     supabase = {
-      from: () => ({
-        select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }) }) }),
-        insert: () => ({ select: () => ({ single: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }) }) }),
-        update: () => ({ eq: () => ({ select: () => ({ single: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }) }) }) }),
-        delete: () => ({ eq: () => Promise.resolve({ error: new Error('Supabase not configured') }) })
-      }),
+      from: () => createMockQuery(),
       rpc: () => Promise.resolve({ error: new Error('Supabase not configured') })
     };
   } else {
@@ -23,19 +29,26 @@ try {
   }
 } catch (error) {
   console.error('Failed to initialize Supabase client:', error);
-  // Create a mock client as fallback
+  // Create a comprehensive mock client as fallback
+  const createMockQuery = () => ({
+    select: () => createMockQuery(),
+    eq: () => createMockQuery(),
+    single: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }),
+    order: () => createMockQuery(),
+    insert: () => createMockQuery(),
+    update: () => createMockQuery(),
+    delete: () => createMockQuery(),
+    then: (resolve) => resolve({ data: [], error: new Error('Supabase not configured') })
+  });
+
   supabase = {
-    from: () => ({
-      select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }) }) }),
-      insert: () => ({ select: () => ({ single: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }) }) }),
-      update: () => ({ eq: () => ({ select: () => ({ single: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }) }) }) }),
-      delete: () => ({ eq: () => Promise.resolve({ error: new Error('Supabase not configured') }) })
-    }),
+    from: () => createMockQuery(),
     rpc: () => Promise.resolve({ error: new Error('Supabase not configured') })
   };
 }
 
 export { supabase };
+
 // Set user context for RLS policies
 export const setUserContext = async (userId: string, userRole: string) => {
   if (supabaseAnonKey !== 'fallback-key') {
