@@ -12,14 +12,6 @@ const LoginPage: React.FC = () => {
   
 
   // Astra DB check
-  React.useEffect(() => {
-    const testConnection = async () => {
-      const isConnected = await AstraAuthService.testConnection();
-      setConnectionStatus(isConnected ? 'connected' : 'disconnected');
-    };
-    testConnection();
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -64,15 +56,6 @@ const LoginPage: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">FH TEST PORTAL</h1>
             <p className="text-gray-600 mb-2">Enter your credentials to access the platform</p>
 
-            <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-              connectionStatus === 'connected' ? 'bg-green-100 text-green-800' :
-              connectionStatus === 'disconnected' ? 'bg-red-100 text-red-800' :
-              'bg-yellow-100 text-yellow-800'
-            }`}>
-              {connectionStatus === 'connected' ? '● Astra DB Connected' :
-               connectionStatus === 'disconnected' ? '● Astra DB Disconnected (Using Fallback)' :
-               '● Checking Connection...'}
-            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
