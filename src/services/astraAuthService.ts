@@ -71,9 +71,9 @@ export class AstraAuthService {
       }   
 
       return {
-        username: data.user.username
-        name: data.user.name
-        admin: data.user.admin
+        username: data.user.username,
+        name: data.user.name,
+        admin: data.user.admin,
       }
   }
 }
