@@ -1,4 +1,4 @@
-import { supabase, setUserContext } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 import { Test, TestResult } from '../types';
 
 export class TestService {

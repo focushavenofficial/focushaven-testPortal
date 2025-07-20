@@ -25,7 +25,14 @@ try {
       rpc: () => Promise.resolve({ error: new Error('Supabase not configured') })
     };
   } else {
-    supabase = createClient(supabaseUrl, supabaseAnonKey);
+    // Create Supabase client without auth since we use external authentication
+    supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false
+      }
+    });
   }
 } catch (error) {
   console.error('Failed to initialize Supabase client:', error);
