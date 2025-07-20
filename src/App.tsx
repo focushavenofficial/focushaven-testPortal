@@ -129,6 +129,41 @@ function App() {
     }
   };
 
+  const handleUpdateTest = async (testId: string, updates: Partial<Test>) => {
+    if (!currentUser) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const updatedTest = await TestService.updateTest(testId, updates);
+      setTests(prev => prev.map(test => test.id === testId ? updatedTest : test));
+    } catch (err) {
+      console.error('Error updating test:', err);
+      setError('Failed to update test. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteTest = async (testId: string) => {
+    if (!currentUser) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      await TestService.deleteTest(testId);
+      setTests(prev => prev.filter(test => test.id !== testId));
+      setResults(prev => prev.filter(result => result.testId !== testId));
+    } catch (err) {
+      console.error('Error deleting test:', err);
+      setError('Failed to delete test. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!currentUser) {
     return <LoginPage onLogin={handleLogin} />;
   }
@@ -169,6 +204,8 @@ function App() {
           onCreateTest={() => setCurrentView('create')}
           onStartTest={handleStartTest}
           onViewResults={() => setCurrentView('results')}
+          onUpdateTest={handleUpdateTest}
+          onDeleteTest={handleDeleteTest}
         />
       )}
       

@@ -1,6 +1,6 @@
 import React from 'react';
 import { User, Test } from '../types';
-import { BookOpen, Plus, BarChart3, LogOut, Clock, Users, FileText } from 'lucide-react';
+import { BookOpen, Plus, BarChart3, LogOut, Clock, Users, FileText, MoreVertical, Edit, Trash2, EyeOff, Eye } from 'lucide-react';
 
 interface DashboardProps {
   user: User;
@@ -9,6 +9,8 @@ interface DashboardProps {
   onCreateTest: () => void;
   onStartTest: (test: Test) => void;
   onViewResults: () => void;
+  onUpdateTest?: (testId: string, updates: Partial<Test>) => void;
+  onDeleteTest?: (testId: string) => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
@@ -17,13 +19,33 @@ const Dashboard: React.FC<DashboardProps> = ({
   onLogout,
   onCreateTest,
   onStartTest,
-  onViewResults
+  onViewResults,
+  onUpdateTest,
+  onDeleteTest
 }) => {
+  const [showDropdown, setShowDropdown] = React.useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState<string | null>(null);
+
   const userTests = tests.filter(test => 
     user.role === 'student' ? test.isActive : 
     user.role === 'teacher' ? test.createdBy === user.id : 
     true
   );
+
+  const handleToggleActive = async (testId: string, currentStatus: boolean) => {
+    if (onUpdateTest) {
+      await onUpdateTest(testId, { isActive: !currentStatus });
+      setShowDropdown(null);
+    }
+  };
+
+  const handleDeleteTest = async (testId: string) => {
+    if (onDeleteTest) {
+      await onDeleteTest(testId);
+      setShowDeleteConfirm(null);
+      setShowDropdown(null);
+    }
+  };
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -176,17 +198,70 @@ const Dashboard: React.FC<DashboardProps> = ({
                         {test.questions.length} questions
                         <span className="mx-2">•</span>
                         Created {test.createdAt.toLocaleDateString()}
+                        {user.role === 'admin' && test.createdBy !== user.id && (
+                          <>
+                            <span className="mx-2">•</span>
+                            <span className="text-blue-600">By: {test.createdBy}</span>
+                          </>
+                        )}
                       </div>
                     </div>
                     
-                    {user.role === 'student' && test.isActive && (
-                      <button
-                        onClick={() => onStartTest(test)}
-                        className="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                      >
-                        Start Test
-                      </button>
-                    )}
+                    <div className="flex items-center space-x-2">
+                      {user.role === 'student' && test.isActive && (
+                        <button
+                          onClick={() => onStartTest(test)}
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                        >
+                          Start Test
+                        </button>
+                      )}
+                      
+                      {(user.role === 'admin' || (user.role === 'teacher' && test.createdBy === user.id)) && (
+                        <div className="relative">
+                          <button
+                            onClick={() => setShowDropdown(showDropdown === test.id ? null : test.id)}
+                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                          >
+                            <MoreVertical className="h-5 w-5" />
+                          </button>
+                          
+                          {showDropdown === test.id && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                              <div className="py-1">
+                                <button
+                                  onClick={() => handleToggleActive(test.id, test.isActive)}
+                                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                >
+                                  {test.isActive ? (
+                                    <>
+                                      <EyeOff className="h-4 w-4 mr-2" />
+                                      Disable Test
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Eye className="h-4 w-4 mr-2" />
+                                      Enable Test
+                                    </>
+                                  )}
+                                </button>
+                                
+                                <button
+                                  onClick={() => {
+                                    setShowDeleteConfirm(test.id);
+                                    setShowDropdown(null);
+                                  }}
+                                  className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete Test
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -194,6 +269,45 @@ const Dashboard: React.FC<DashboardProps> = ({
           )}
         </div>
       </main>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center mb-4">
+              <Trash2 className="h-6 w-6 text-red-500 mr-2" />
+              <h3 className="text-lg font-medium text-gray-900">Delete Test</h3>
+            </div>
+            
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this test? This action cannot be undone and will also delete all associated test results.
+            </p>
+            
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowDeleteConfirm(null)}
+                className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteTest(showDeleteConfirm)}
+                className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+              >
+                Delete Test
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Click outside to close dropdown */}
+      {showDropdown && (
+        <div 
+          className="fixed inset-0 z-0" 
+          onClick={() => setShowDropdown(null)}
+        />
+      )}
     </div>
   );
 };
