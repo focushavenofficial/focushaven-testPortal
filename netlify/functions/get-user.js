@@ -1,12 +1,9 @@
-import dotenv from "dotenv";
 import { DataAPIClient } from "@datastax/astra-db-ts";
-
-dotenv.config()
 
 export default async function testingFunc(){
   try{
-    const AstraClient = new DataAPIClient(process.env.VITE_ASTRA_DB_TOKEN);
-    const AstraDB = AstraClient.db(process.env.VITE_ASTRA_DB_URL);
+    const AstraClient = new DataAPIClient(import.meta.env.VITE_ASTRA_DB_TOKEN);
+    const AstraDB = AstraClient.db(import.meta.env.VITE_ASTRA_DB_URL);
     
     const collection =  AstraDB.collection("notes")
     
