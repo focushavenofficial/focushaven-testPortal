@@ -66,7 +66,7 @@ export class AstraAuthService {
       const data = await response.json();
 
       if(!data.success){
-        console.warn("error While fetching user Info")
+        console.warn("error While fetching user Info : ", data.message)
         return null
       }   
 
@@ -75,5 +75,9 @@ export class AstraAuthService {
         name: data.user.name,
         admin: data.user.admin,
       }
+    catch(err){
+      console.warn("Error Fetching user Info : ", err)
+      return null
+    }
   }
 }
