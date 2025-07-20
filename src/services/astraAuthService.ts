@@ -51,7 +51,7 @@ export class AstraAuthService {
     }
   }
 
-  static async getUserInfo(): promise<userFetch | null > {
+  static async getUserInfo(): Promise<userFetch | null> {
     try {
       const hashedPassword = md5(password);
       const response = await fetch('https://focushaven-api.vercel.app/api/v1/user/getUserInfo', {
