@@ -2,11 +2,12 @@ import { db } from '../lib/astradb';
 import { User } from '../types';
 import md5 from 'js-md5';
 
-const userFetch = {
+interface UserFetch {
   username: string,
   name: string,
   admin: boolean
 }
+
 export class AstraAuthService {
   private static readonly COLLECTION_NAME = 'users';
 
@@ -51,9 +52,8 @@ export class AstraAuthService {
     }
   }
 
-  static async getUserInfo(): Promise<userFetch | null> {
+  static async getUserInfo(): Promise<UserFetch | null> {
     try {
-      const hashedPassword = md5(password);
       const response = await fetch('https://focushaven-api.vercel.app/api/v1/user/getUserInfo', {
         method: 'POST',
         headers: {
