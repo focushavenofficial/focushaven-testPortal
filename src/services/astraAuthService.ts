@@ -1,4 +1,3 @@
-import { db } from '../lib/astradb';
 import { User } from '../types';
 import md5 from 'js-md5';
 
@@ -9,7 +8,6 @@ interface UserFetch {
 }
 
 export class AstraAuthService {
-  private static readonly COLLECTION_NAME = 'users';
 
   static async authenticateUser(username: string, password: string): Promise<User | null> {
     try {
