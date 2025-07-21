@@ -44,8 +44,18 @@ export class TestService {
       query = query
         .eq('is_active', true);
       
-      if (userClass && userClass !== 0) {
+      if (userClass === 0) {
+        // Class 0 users can see all active tests
+        // No additional filter needed
+      } else if (userClass) {
+        // Users with specific class can only see:
+        // - Tests with no target class (null)
+        // - Tests targeted to all classes (0)  
+        // - Tests specifically for their class
         query = query.or(`target_class.is.null,target_class.eq.0,target_class.eq.${userClass}`);
+      } else {
+        // Users without class info can only see general tests
+        query = query.or(`target_class.is.null,target_class.eq.0`);
       }
     } else if (userRole === 'teacher') {
       query = query.eq('created_by', userId);
