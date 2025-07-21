@@ -38,7 +38,7 @@ export class TestService {
     // Apply filters based on user role
     if (userRole === 'student') {
       // Students see active tests that are either:
-        .eq('is_active', true);
+      query = query.eq('is_active', true);
       
       // Debug: Log the user class
       console.log('User class:', userClass);
