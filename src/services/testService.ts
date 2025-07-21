@@ -38,24 +38,51 @@ export class TestService {
     // Apply filters based on user role
     if (userRole === 'student') {
       // Students see active tests that are either:
-      // 1. Available to all classes (target_class is null or 0)
-      // 2. Specifically targeted to their class
-      // 3. User is in class 0 (can see all tests)
-      query = query
         .eq('is_active', true);
       
-      if (userClass === 0) {
-        // Class 0 users can see all active tests
-        // No additional filter needed
-      } else if (userClass) {
-        // Users with specific class can only see:
-        // - Tests with no target class (null)
-        // - Tests targeted to all classes (0)  
-        // - Tests specifically for their class
-        query = query.or(`target_class.is.null,target_class.eq.0,target_class.eq.${userClass}`);
+      // Debug: Log the user class
+      console.log('User class:', userClass);
+      
+      if (userClass === 0 || userClass === undefined || userClass === null) {
+        // Class 0 or no class: see all active tests
+        console.log('User has class 0 or no class - showing all tests');
       } else {
-        // Users without class info can only see general tests
-        query = query.or(`target_class.is.null,target_class.eq.0`);
+        // Specific class: only see tests for their class or general tests
+        console.log(`User has class ${userClass} - filtering tests`);
+        // Use a more explicit filter
+        const { data: allTests, error: fetchError } = await supabase
+          .from('tests')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
+          
+        if (fetchError) throw fetchError;
+        
+        // Filter in JavaScript for more control
+        const filteredTests = allTests.filter(test => {
+          const targetClass = test.target_class;
+          console.log(`Test "${test.title}" has target_class:`, targetClass, 'User class:', userClass);
+          
+          // Show test if:
+          // 1. No target class (available to all)
+          // 2. Target class is 0 (available to all)
+          // 3. Target class matches user's class
+          const shouldShow = targetClass === null || targetClass === 0 || targetClass === userClass;
+          console.log(`Should show test "${test.title}":`, shouldShow);
+          return shouldShow;
+        });
+        
+        return filteredTests.map(test => ({
+          id: test.id,
+          title: test.title,
+          description: test.description,
+          duration: test.duration,
+          questions: test.questions,
+          createdBy: test.created_by,
+          createdAt: new Date(test.created_at),
+          isActive: test.is_active,
+          targetClass: test.target_class
+        }));
       }
     } else if (userRole === 'teacher') {
       query = query.eq('created_by', userId);
