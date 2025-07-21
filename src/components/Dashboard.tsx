@@ -55,7 +55,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-amber-100">
+    <div className="min-h-screen bg-yellow-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -68,7 +68,7 @@ const Dashboard: React.FC<DashboardProps> = ({
               <div className="text-sm text-gray-600">
                 Welcome, <span className="font-medium text-gray-900">{user.name}</span>
               </div>
-              <div className="px-2 py-1 bg-blue-100 text-orange-800 text-xs font-medium rounded-full">
+              <div className="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">
                 {user.role}
               </div>
               <button
@@ -102,7 +102,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <FileText className="h-8 w-8 text-blue-600" />
+                <FileText className="h-8 w-8 text-amber-900" />
               </div>
               <div className="ml-4">
                 <div className="text-2xl font-bold text-gray-900">{userTests.length}</div>
@@ -147,7 +147,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           {(user.role === 'teacher' || user.role === 'admin') && (
             <button
               onClick={onCreateTest}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
             >
               <Plus className="h-4 w-4 mr-2" />
               Create New Test
