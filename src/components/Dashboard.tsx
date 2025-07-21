@@ -68,7 +68,7 @@ const Dashboard: React.FC<DashboardProps> = ({
               <div className="text-sm text-gray-600">
                 Welcome, <span className="font-medium text-gray-900">{user.name}</span>
               </div>
-              <div className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+              <div className="px-2 py-1 bg-blue-100 text-orange-800 text-xs font-medium rounded-full">
                 {user.role}
               </div>
               <button
