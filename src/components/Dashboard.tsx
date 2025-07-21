@@ -55,7 +55,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-yellow-50">
+    <div className="min-h-screen bg-lime-100">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -156,7 +156,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           
           <button
             onClick={onViewResults}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
           >
             <BarChart3 className="h-4 w-4 mr-2" />
             View Results
@@ -185,7 +185,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                       <div className="flex items-center">
                         <h4 className="text-lg font-medium text-gray-900">{test.title}</h4>
                         <div className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${
-                          test.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                          test.isActive ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-800'
                         }`}>
                           {test.isActive ? 'Active' : 'Inactive'}
                         </div>
@@ -217,7 +217,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                       {user.role === 'student' && test.isActive && (
                         <button
                           onClick={() => onStartTest(test)}
-                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
                         >
                           Start Test
                         </button>
