@@ -5,7 +5,8 @@ import { supabase } from '../lib/supabase';
 interface UserFetch {
   username: string,
   name: string,
-  admin: boolean
+  admin: boolean,
+  class?: number
 }
 
 export class AstraAuthService {
@@ -45,7 +46,8 @@ export class AstraAuthService {
         id: user.username,
         passcode: password, // Store original password for compatibility
         name: user.name,
-        role: user.admin ? 'admin' : 'student' // Map admin boolean to role
+        role: user.admin ? 'admin' : 'student', // Map admin boolean to role
+        class: user.class || 0 // Default to class 0 if not present
       };
     } catch (error) {
       console.error('Astra DB authentication error:', error);
@@ -75,6 +77,7 @@ export class AstraAuthService {
         username: data.user.username,
         name: data.user.name,
         admin: data.user.admin,
+        class: data.user.class
       }
       } catch(err){
     console.warn("Error Fetching user Info : ", err)
@@ -95,7 +98,8 @@ export class AstraAuthService {
         id: astraUser.username,
         name: astraUser.name,
         role: astraUser.admin ? 'admin' : 'student',
-        is_active: true
+        is_active: true,
+        class: astraUser.class || 0
       };
 
       if (!existingUser) {

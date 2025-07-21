@@ -3,6 +3,7 @@ export interface User {
   passcode: string;
   name: string;
   role: 'admin' | 'teacher' | 'student';
+  class?: number;
 }
 
 export interface Question {
@@ -22,6 +23,7 @@ export interface Test {
   createdBy: string;
   createdAt: Date;
   isActive: boolean;
+  targetClass?: number; // null/undefined means available to all classes
 }
 
 export interface TestResult {

@@ -204,6 +204,12 @@ const Dashboard: React.FC<DashboardProps> = ({
                             <span className="text-blue-600">By: {test.createdBy}</span>
                           </>
                         )}
+                        {test.targetClass && (
+                          <>
+                            <span className="mx-2">•</span>
+                            <span className="text-purple-600">Class {test.targetClass}</span>
+                          </>
+                        )}
                       </div>
                     </div>
                     

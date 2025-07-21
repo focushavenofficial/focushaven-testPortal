@@ -32,7 +32,7 @@ function App() {
     
     try {
       const [testsData, resultsData] = await Promise.all([
-        TestService.getTests(currentUser.role, currentUser.id),
+        TestService.getTests(currentUser.role, currentUser.id, currentUser.class),
         TestService.getTestResults(currentUser.role, currentUser.id)
       ]);
       

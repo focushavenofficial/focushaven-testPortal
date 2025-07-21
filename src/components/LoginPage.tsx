@@ -42,6 +42,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">FH TEST PORTAL</h1>
             <p className="text-gray-600 mb-2">Enter your credentials to access the platform</p>
+            <p className="text-sm text-gray-500">Class-based test access system</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">

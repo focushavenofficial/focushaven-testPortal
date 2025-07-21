@@ -11,7 +11,8 @@ export class TestService {
         duration: test.duration,
         questions: test.questions,
         created_by: test.createdBy,
-        is_active: test.isActive
+        is_active: test.isActive,
+        target_class: test.targetClass
       })
       .select()
       .single();
@@ -26,16 +27,26 @@ export class TestService {
       questions: data.questions,
       createdBy: data.created_by,
       createdAt: new Date(data.created_at),
-      isActive: data.is_active
+      isActive: data.is_active,
+      targetClass: data.target_class
     };
   }
 
-  static async getTests(userRole: string, userId?: string): Promise<Test[]> {
+  static async getTests(userRole: string, userId?: string, userClass?: number): Promise<Test[]> {
     let query = supabase.from('tests').select('*');
 
     // Apply filters based on user role
     if (userRole === 'student') {
-      query = query.eq('is_active', true);
+      // Students see active tests that are either:
+      // 1. Available to all classes (target_class is null or 0)
+      // 2. Specifically targeted to their class
+      // 3. User is in class 0 (can see all tests)
+      query = query
+        .eq('is_active', true);
+      
+      if (userClass && userClass !== 0) {
+        query = query.or(`target_class.is.null,target_class.eq.0,target_class.eq.${userClass}`);
+      }
     } else if (userRole === 'teacher') {
       query = query.eq('created_by', userId);
     }
@@ -53,7 +64,8 @@ export class TestService {
       questions: test.questions,
       createdBy: test.created_by,
       createdAt: new Date(test.created_at),
-      isActive: test.is_active
+      isActive: test.is_active,
+      targetClass: test.target_class
     }));
   }
 
@@ -112,6 +124,7 @@ export class TestService {
     if (updates.duration) updateData.duration = updates.duration;
     if (updates.questions) updateData.questions = updates.questions;
     if (updates.isActive !== undefined) updateData.is_active = updates.isActive;
+    if (updates.targetClass !== undefined) updateData.target_class = updates.targetClass;
 
     const { data, error } = await supabase
       .from('tests')
@@ -130,7 +143,8 @@ export class TestService {
       questions: data.questions,
       createdBy: data.created_by,
       createdAt: new Date(data.created_at),
-      isActive: data.is_active
+      isActive: data.is_active,
+      targetClass: data.target_class
     };
   }
 

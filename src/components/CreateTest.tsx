@@ -12,6 +12,7 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
   const [testTitle, setTestTitle] = useState('');
   const [testDescription, setTestDescription] = useState('');
   const [testDuration, setTestDuration] = useState(30);
+  const [targetClass, setTargetClass] = useState<number | undefined>(undefined);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState<Partial<Question>>({
     question: '',
@@ -59,7 +60,8 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
         duration: testDuration,
         questions,
         createdBy,
-        isActive: true
+        isActive: true,
+        targetClass: targetClass
       });
     }
   };
@@ -119,6 +121,35 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
+              </div>
+              
+              <div>
+                <label htmlFor="targetClass" className="block text-sm font-medium text-gray-700 mb-2">
+                  Target Class
+                </label>
+                <select
+                  id="targetClass"
+                  value={targetClass || ''}
+                  onChange={(e) => setTargetClass(e.target.value ? parseInt(e.target.value) : undefined)}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">All Classes</option>
+                  <option value="1">Class 1</option>
+                  <option value="2">Class 2</option>
+                  <option value="3">Class 3</option>
+                  <option value="4">Class 4</option>
+                  <option value="5">Class 5</option>
+                  <option value="6">Class 6</option>
+                  <option value="7">Class 7</option>
+                  <option value="8">Class 8</option>
+                  <option value="9">Class 9</option>
+                  <option value="10">Class 10</option>
+                  <option value="11">Class 11</option>
+                  <option value="12">Class 12</option>
+                </select>
+                <p className="mt-1 text-sm text-gray-500">
+                  Leave empty to make test available to all classes
+                </p>
               </div>
             </div>
             
