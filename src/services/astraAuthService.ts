@@ -77,7 +77,7 @@ export class AstraAuthService {
         username: data.user.username,
         name: data.user.name,
         admin: data.user.admin,
-        class: data.user.class
+        class: data.user.Class
       }
       } catch(err){
     console.warn("Error Fetching user Info : ", err)
