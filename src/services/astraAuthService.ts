@@ -1,6 +1,6 @@
 import { User } from '../types';
 import md5 from 'js-md5';
-import testingFunc from '../../netlify/functions/get-user.js'
+import { supabase } from '../lib/supabase';
 
 interface UserFetch {
   username: string,
@@ -37,6 +37,8 @@ export class AstraAuthService {
         return null;
       }
       
+      // Create or update user in Supabase for foreign key consistency
+      await AstraAuthService.syncUserToSupabase(user, password);
       
       // Convert Astra user format to your app's User format
       return {
@@ -78,5 +80,39 @@ export class AstraAuthService {
     console.warn("Error Fetching user Info : ", err)
     return null
   }
+  }
+
+  static async syncUserToSupabase(astraUser: UserFetch, password: string): Promise<void> {
+    try {
+      // Check if user exists in Supabase
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', astraUser.username)
+        .single();
+
+      const userData = {
+        id: astraUser.username,
+        name: astraUser.name,
+        role: astraUser.admin ? 'admin' : 'student',
+        is_active: true
+      };
+
+      if (!existingUser) {
+        // Create new user
+        await supabase
+          .from('users')
+          .insert(userData);
+      } else {
+        // Update existing user
+        await supabase
+          .from('users')
+          .update(userData)
+          .eq('id', astraUser.username);
+      }
+    } catch (error) {
+      console.error('Error syncing user to Supabase:', error);
+      // Don't throw error - authentication can still proceed
+    }
   }
 }
