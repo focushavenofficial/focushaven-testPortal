@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { TestResult, Test, User } from '../types';
-import { ArrowLeft, BarChart3, TrendingUp, Award, Clock, User as UserIcon } from 'lucide-react';
+import { ArrowLeft, BarChart3, TrendingUp, Award, Clock, User as UserIcon, Eye } from 'lucide-react';
 
 interface ResultsProps {
   results: TestResult[];
   tests: Test[];
   currentUser: User;
   onBack: () => void;
+  onViewResult: (result: TestResult) => void;
 }
 
-const Results: React.FC<ResultsProps> = ({ results, tests, currentUser, onBack }) => {
+const Results: React.FC<ResultsProps> = ({ results, tests, currentUser, onBack, onViewResult }) => {
   const [selectedTest, setSelectedTest] = useState<string>('all');
 
   const filteredResults = selectedTest === 'all' 
@@ -189,6 +190,9 @@ const Results: React.FC<ResultsProps> = ({ results, tests, currentUser, onBack }
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Completed
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -228,6 +232,15 @@ const Results: React.FC<ResultsProps> = ({ results, tests, currentUser, onBack }
                               <Clock className="h-4 w-4 mr-1 text-gray-400" />
                               {result.completedAt.toLocaleDateString()} at {result.completedAt.toLocaleTimeString()}
                             </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <button
+                              onClick={() => onViewResult(result)}
+                              className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                            >
+                              <Eye className="h-3 w-3 mr-1" />
+                              Review
+                            </button>
                           </td>
                         </tr>
                       );

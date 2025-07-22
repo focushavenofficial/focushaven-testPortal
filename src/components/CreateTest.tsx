@@ -199,6 +199,7 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="multiple-choice">Multiple Choice</option>
+                  <option value="true-false">True/False</option>
                   <option value="short-answer">Short Answer</option>
                   <option value="fill-in-blank">Fill in the Blank</option>
                 </select>
@@ -247,6 +248,36 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                   ))}
                 </div>
               </div>
+              )}
+
+              {currentQuestion.type === 'true-false' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Correct Answer
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                      <input
+                        type="radio"
+                        name="true-false-answer"
+                        checked={currentQuestion.correctAnswer === 1}
+                        onChange={() => setCurrentQuestion({ ...currentQuestion, correctAnswer: 1 })}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-3 text-gray-900">True</span>
+                    </label>
+                    <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                      <input
+                        type="radio"
+                        name="true-false-answer"
+                        checked={currentQuestion.correctAnswer === 0}
+                        onChange={() => setCurrentQuestion({ ...currentQuestion, correctAnswer: 0 })}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-3 text-gray-900">False</span>
+                    </label>
+                  </div>
+                </div>
               )}
 
               {(currentQuestion.type === 'short-answer' || currentQuestion.type === 'fill-in-blank') && (
@@ -311,10 +342,25 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                         {(question.type === 'short-answer' || question.type === 'fill-in-blank') && (
                           <div className="mt-2">
                             <div className="text-sm text-gray-600">
-                              <span className="font-medium">Type:</span> {question.type === 'short-answer' ? 'Short Answer' : 'Fill in the Blank'}
+                              <span className="font-medium">Type:</span> {
+                                question.type === 'short-answer' ? 'Short Answer' : 
+                                question.type === 'fill-in-blank' ? 'Fill in the Blank' :
+                                question.type === 'true-false' ? 'True/False' :
+                                'Multiple Choice'
+                              }
                             </div>
                             <div className="text-sm text-gray-600">
                               <span className="font-medium">Expected Answer:</span> {question.expectedAnswer}
+                            </div>
+                          </div>
+                        )}
+                        {question.type === 'true-false' && (
+                          <div className="mt-2">
+                            <div className="text-sm text-gray-600">
+                              <span className="font-medium">Type:</span> True/False
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              <span className="font-medium">Correct Answer:</span> {question.correctAnswer === 1 ? 'True' : 'False'}
                             </div>
                           </div>
                         )}

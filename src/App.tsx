@@ -4,14 +4,16 @@ import Dashboard from './components/Dashboard';
 import TestTaking from './components/TestTaking';
 import CreateTest from './components/CreateTest';
 import Results from './components/Results';
+import TestReview from './components/TestReview';
 import { User, Test, TestResult } from './types';
 import { TestService } from './services/testService';
 import { AstraAuthService } from './services/astraAuthService';
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'test' | 'create' | 'results'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'test' | 'create' | 'results' | 'review'>('dashboard');
   const [selectedTest, setSelectedTest] = useState<Test | null>(null);
+  const [selectedResult, setSelectedResult] = useState<TestResult | null>(null);
   const [tests, setTests] = useState<Test[]>([]);
   const [results, setResults] = useState<TestResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -74,6 +76,7 @@ function App() {
     setCurrentUser(null);
     setCurrentView('dashboard');
     setSelectedTest(null);
+    setSelectedResult(null);
     setTests([]);
     setResults([]);
     setError(null);
@@ -128,6 +131,11 @@ function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleViewResult = (result: TestResult) => {
+    setSelectedResult(result);
+    setCurrentView('review');
   };
 
   const handleUpdateTest = async (testId: string, updates: Partial<Test>) => {
@@ -232,6 +240,16 @@ function App() {
           tests={tests}
           currentUser={currentUser}
           onBack={() => setCurrentView('dashboard')}
+          onViewResult={handleViewResult}
+        />
+      )}
+      
+      {currentView === 'review' && selectedResult && (
+        <TestReview
+          result={selectedResult}
+          test={tests.find(t => t.id === selectedResult.testId)!}
+          currentUser={currentUser}
+          onBack={() => setCurrentView('results')}
         />
       )}
     </div>

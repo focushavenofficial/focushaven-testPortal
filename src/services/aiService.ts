@@ -24,11 +24,21 @@ export class AIService {
       });
 
       if (!response.ok) {
+        console.warn('Hugging Face API request failed, using fallback');
         throw new Error('Hugging Face API request failed');
       }
 
       const result = await response.json();
-      return result[0] || 0;
+      
+      // Handle different response formats
+      if (Array.isArray(result) && result.length > 0) {
+        return result[0];
+      } else if (typeof result === 'number') {
+        return result;
+      } else {
+        console.warn('Unexpected API response format, using fallback');
+        return this.basicSimilarity(text1, text2);
+      }
     } catch (error) {
       console.error('AI similarity check failed, using fallback:', error);
       return this.basicSimilarity(text1, text2);
@@ -41,6 +51,13 @@ export class AIService {
     
     if (str1 === str2) return 1.0;
     
+    // Check if one string contains the other
+    if (str1.includes(str2) || str2.includes(str1)) {
+      const shorter = str1.length < str2.length ? str1 : str2;
+      const longer = str1.length >= str2.length ? str1 : str2;
+      return shorter.length / longer.length;
+    }
+    
     // Simple word overlap similarity
     const words1 = str1.split(/\s+/);
     const words2 = str2.split(/\s+/);
@@ -51,14 +68,14 @@ export class AIService {
     return intersection.length / union.length;
   }
 
-  static isAnswerCorrect(userAnswer: string, expectedAnswer: string, threshold: number = 0.8): boolean {
+  static async isAnswerCorrect(userAnswer: string, expectedAnswer: string, threshold: number = 0.8): Promise<boolean> {
     // For exact matches or very similar answers
     if (userAnswer.toLowerCase().trim() === expectedAnswer.toLowerCase().trim()) {
       return true;
     }
     
-    // For now, we'll use a simple approach. In production, you'd want to use the AI service
-    const similarity = this.basicSimilarity(userAnswer, expectedAnswer);
+    // Use AI similarity checking
+    const similarity = await this.checkSimilarity(userAnswer, expectedAnswer);
     return similarity >= threshold;
   }
 }

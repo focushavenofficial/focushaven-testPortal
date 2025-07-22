@@ -134,13 +134,17 @@ export class TestService {
       })
     );
 
+    // Calculate score based on detailed results
+    const correctCount = detailedResults.filter(r => r.isCorrect).length;
+    const calculatedScore = Math.round((correctCount / test.questions.length) * 100);
+
     const { data, error } = await supabase
       .from('test_results')
       .insert({
         test_id: result.testId,
         user_id: result.userId,
         answers: result.answers,
-        score: result.score,
+        score: calculatedScore,
         detailed_results: detailedResults
       })
       .select()

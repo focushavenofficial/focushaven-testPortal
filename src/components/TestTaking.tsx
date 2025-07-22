@@ -153,6 +153,33 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, onBack }) => {
               </div>
               )}
 
+              {test.questions[currentQuestion].type === 'true-false' && (
+                <div className="space-y-3">
+                  <label className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input
+                      type="radio"
+                      name={`question-${test.questions[currentQuestion].id}`}
+                      value={1}
+                      checked={answers[test.questions[currentQuestion].id] === 1}
+                      onChange={() => handleAnswerSelect(test.questions[currentQuestion].id, 1)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <span className="ml-3 text-gray-900">True</span>
+                  </label>
+                  <label className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input
+                      type="radio"
+                      name={`question-${test.questions[currentQuestion].id}`}
+                      value={0}
+                      checked={answers[test.questions[currentQuestion].id] === 0}
+                      onChange={() => handleAnswerSelect(test.questions[currentQuestion].id, 0)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <span className="ml-3 text-gray-900">False</span>
+                  </label>
+                </div>
+              )}
+
               {test.questions[currentQuestion].type === 'short-answer' && (
                 <div>
                   <textarea
