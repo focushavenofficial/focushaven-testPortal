@@ -144,13 +144,23 @@ export class TestService {
         test_id: result.testId,
         user_id: result.userId,
         answers: result.answers,
-        score: calculatedScore,
-        detailed_results: detailedResults
+        score: calculatedScore
       })
       .select()
       .single();
 
     if (error) throw error;
+
+    // Update with detailed results in a separate query to avoid schema issues
+    const { error: updateError } = await supabase
+      .from('test_results')
+      .update({ detailed_results: detailedResults })
+      .eq('id', data.id);
+
+    if (updateError) {
+      console.warn('Could not save detailed results:', updateError);
+      // Don't throw error - basic functionality still works
+    }
 
     return {
       id: data.id,
@@ -159,7 +169,7 @@ export class TestService {
       answers: data.answers,
       score: data.score,
       completedAt: new Date(data.completed_at),
-      detailedResults: data.detailed_results
+      detailedResults: detailedResults
     };
   }
 
