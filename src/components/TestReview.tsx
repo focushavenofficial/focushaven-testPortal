@@ -198,6 +198,31 @@ const TestReview: React.FC<TestReviewProps> = ({ result, test, currentUser, onBa
                 </div>
               </div>
             );
+              {/* Real Number Questions */}
+              {question.type === 'real-number' && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Your Answer:
+                    </label>
+                    <div className={`p-3 rounded-lg border-2 ${
+                      isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+                    }`}>
+                      <p className="text-gray-900">{userAnswer as string || 'No answer provided'}</p>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Correct Answer:
+                    </label>
+                    <div className="p-3 rounded-lg border-2 border-green-200 bg-green-50">
+                      <p className="text-gray-900">{question.correctNumber}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
           })}
         </div>
 
@@ -215,7 +240,7 @@ const TestReview: React.FC<TestReviewProps> = ({ result, test, currentUser, onBa
               <div className="text-2xl font-bold text-red-600">{totalQuestions - correctAnswers}</div>
               <div className="text-sm text-gray-600">Incorrect Answers</div>
             </div>
-            
+                    {isCorrect ? ' (Accepted as correct)' : ' (Marked as incorrect)'}
             <div className="text-center p-4 bg-blue-50 rounded-lg">
               <div className={`text-2xl font-bold ${getScoreColor(result.score)}`}>{result.score}%</div>
               <div className="text-sm text-gray-600">Overall Score</div>

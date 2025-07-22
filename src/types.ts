@@ -11,8 +11,9 @@ export interface Question {
   question: string;
   options: string[];
   correctAnswer: number;
-  type: 'multiple-choice' | 'true-false' | 'short-answer' | 'fill-in-blank';
+  type: 'multiple-choice' | 'true-false' | 'short-answer' | 'fill-in-blank' | 'real-number';
   expectedAnswer?: string; // For short-answer and fill-in-blank questions
+  correctNumber?: number; // For real-number questions
 }
 
 export interface Test {

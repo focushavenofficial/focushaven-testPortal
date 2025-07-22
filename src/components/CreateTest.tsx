@@ -19,14 +19,17 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
     options: ['', '', '', ''],
     correctAnswer: 0,
     type: 'multiple-choice',
-    expectedAnswer: ''
+    expectedAnswer: '',
+    correctNumber: undefined
   });
 
   const handleAddQuestion = () => {
     const isValidQuestion = currentQuestion.question && (
       (currentQuestion.type === 'multiple-choice' && currentQuestion.options?.every(opt => opt.trim())) ||
+      (currentQuestion.type === 'true-false') ||
       (currentQuestion.type === 'short-answer' && currentQuestion.expectedAnswer?.trim()) ||
-      (currentQuestion.type === 'fill-in-blank' && currentQuestion.expectedAnswer?.trim())
+      (currentQuestion.type === 'fill-in-blank' && currentQuestion.expectedAnswer?.trim()) ||
+      (currentQuestion.type === 'real-number' && currentQuestion.correctNumber !== undefined)
     );
 
     if (isValidQuestion) {
@@ -36,7 +39,8 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
         options: currentQuestion.options || [],
         correctAnswer: currentQuestion.correctAnswer || 0,
         type: currentQuestion.type || 'multiple-choice',
-        expectedAnswer: currentQuestion.expectedAnswer
+        expectedAnswer: currentQuestion.expectedAnswer,
+        correctNumber: currentQuestion.correctNumber
       };
       
       setQuestions([...questions, newQuestion]);
@@ -45,7 +49,8 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
         options: ['', '', '', ''],
         correctAnswer: 0,
         type: 'multiple-choice',
-        expectedAnswer: ''
+        expectedAnswer: '',
+        correctNumber: undefined
       });
     }
   };
@@ -194,7 +199,8 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                     type: e.target.value as Question['type'],
                     options: e.target.value === 'multiple-choice' ? ['', '', '', ''] : [],
                     correctAnswer: 0,
-                    expectedAnswer: ''
+                    expectedAnswer: '',
+                    correctNumber: undefined
                   })}
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
@@ -202,6 +208,7 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                   <option value="true-false">True/False</option>
                   <option value="short-answer">Short Answer</option>
                   <option value="fill-in-blank">Fill in the Blank</option>
+                  <option value="real-number">Real Number</option>
                 </select>
               </div>
 
@@ -298,6 +305,26 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                   </p>
                 </div>
               )}
+
+              {currentQuestion.type === 'real-number' && (
+                <div>
+                  <label htmlFor="correctNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                    Correct Number
+                  </label>
+                  <input
+                    type="number"
+                    id="correctNumber"
+                    step="0.001"
+                    value={currentQuestion.correctNumber || ''}
+                    onChange={(e) => setCurrentQuestion({ ...currentQuestion, correctNumber: parseFloat(e.target.value) || undefined })}
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter the correct number (up to 3 decimal places)"
+                  />
+                  <p className="mt-1 text-sm text-gray-500">
+                    Numbers will be compared up to 3 decimal places for accuracy
+                  </p>
+                </div>
+              )}
               
               <button
                 type="button"
@@ -346,11 +373,22 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                                 question.type === 'short-answer' ? 'Short Answer' : 
                                 question.type === 'fill-in-blank' ? 'Fill in the Blank' :
                                 question.type === 'true-false' ? 'True/False' :
+                                question.type === 'real-number' ? 'Real Number' :
                                 'Multiple Choice'
                               }
                             </div>
                             <div className="text-sm text-gray-600">
                               <span className="font-medium">Expected Answer:</span> {question.expectedAnswer}
+                            </div>
+                          </div>
+                        )}
+                        {question.type === 'real-number' && (
+                          <div className="mt-2">
+                            <div className="text-sm text-gray-600">
+                              <span className="font-medium">Type:</span> Real Number
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              <span className="font-medium">Correct Answer:</span> {question.correctNumber}
                             </div>
                           </div>
                         )}

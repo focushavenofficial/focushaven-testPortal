@@ -120,14 +120,18 @@ export class TestService {
         } else if (question.type === 'short-answer' || question.type === 'fill-in-blank') {
           if (question.expectedAnswer && typeof userAnswer === 'string') {
             similarityScore = await AIService.checkSimilarity(userAnswer, question.expectedAnswer);
-            isCorrect = AIService.isAnswerCorrect(userAnswer, question.expectedAnswer);
+            isCorrect = await AIService.isAnswerCorrect(userAnswer, question.expectedAnswer);
+          }
+        } else if (question.type === 'real-number') {
+          if (question.correctNumber !== undefined && typeof userAnswer === 'string') {
+            isCorrect = AIService.checkRealNumber(userAnswer, question.correctNumber);
           }
         }
 
         return {
           questionId: question.id,
           userAnswer,
-          correctAnswer: question.expectedAnswer || question.correctAnswer,
+          correctAnswer: question.expectedAnswer || question.correctNumber || question.correctAnswer,
           isCorrect,
           similarityScore
         };

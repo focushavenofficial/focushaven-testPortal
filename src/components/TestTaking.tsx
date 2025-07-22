@@ -55,6 +55,18 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, onBack }) => {
           if (userAnswer.toLowerCase().trim() === question.expectedAnswer.toLowerCase().trim()) {
             correct++;
           }
+        } else if (question.type === 'real-number') {
+          // For real numbers, do exact comparison up to 3 decimal places
+          if (question.correctNumber !== undefined && typeof userAnswer === 'string') {
+            const userNum = parseFloat(userAnswer.trim());
+            if (!isNaN(userNum)) {
+              const roundedUser = Math.round(userNum * 1000) / 1000;
+              const roundedCorrect = Math.round(question.correctNumber * 1000) / 1000;
+              if (roundedUser === roundedCorrect) {
+                correct++;
+              }
+            }
+          }
         }
       }
     });
@@ -201,6 +213,20 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, onBack }) => {
                     onChange={(e) => handleAnswerSelect(test.questions[currentQuestion].id, e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter your answer..."
+                  />
+                </div>
+              )}
+
+              {test.questions[currentQuestion].type === 'real-number' && (
+                <div>
+                  <p className="text-gray-600 mb-3">Enter the numerical answer (up to 3 decimal places):</p>
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={answers[test.questions[currentQuestion].id] as string || ''}
+                    onChange={(e) => handleAnswerSelect(test.questions[currentQuestion].id, e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter your numerical answer..."
                   />
                 </div>
               )}

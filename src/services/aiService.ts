@@ -78,4 +78,19 @@ export class AIService {
     const similarity = await this.checkSimilarity(userAnswer, expectedAnswer);
     return similarity >= threshold;
   }
+
+  static checkRealNumber(userAnswer: string, correctNumber: number): boolean {
+    try {
+      const userNum = parseFloat(userAnswer.trim());
+      if (isNaN(userNum)) return false;
+      
+      // Round both numbers to 3 decimal places for comparison
+      const roundedUser = Math.round(userNum * 1000) / 1000;
+      const roundedCorrect = Math.round(correctNumber * 1000) / 1000;
+      
+      return roundedUser === roundedCorrect;
+    } catch (error) {
+      return false;
+    }
+  }
 }
