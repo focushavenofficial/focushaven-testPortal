@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { Test, TestResult } from '../types';
+import { AIService } from './aiService';
 
 export class TestService {
   static async createTest(test: Omit<Test, 'id' | 'createdAt'>): Promise<Test> {
@@ -106,14 +107,41 @@ export class TestService {
     }));
   }
 
-  static async submitTestResult(result: Omit<TestResult, 'id' | 'completedAt'>): Promise<TestResult> {
+  static async submitTestResult(result: Omit<TestResult, 'id' | 'completedAt'>, test: Test): Promise<TestResult> {
+    // Calculate detailed results with AI checking for text answers
+    const detailedResults = await Promise.all(
+      test.questions.map(async (question) => {
+        const userAnswer = result.answers[question.id];
+        let isCorrect = false;
+        let similarityScore: number | undefined;
+
+        if (question.type === 'multiple-choice' || question.type === 'true-false') {
+          isCorrect = userAnswer === question.correctAnswer;
+        } else if (question.type === 'short-answer' || question.type === 'fill-in-blank') {
+          if (question.expectedAnswer && typeof userAnswer === 'string') {
+            similarityScore = await AIService.checkSimilarity(userAnswer, question.expectedAnswer);
+            isCorrect = AIService.isAnswerCorrect(userAnswer, question.expectedAnswer);
+          }
+        }
+
+        return {
+          questionId: question.id,
+          userAnswer,
+          correctAnswer: question.expectedAnswer || question.correctAnswer,
+          isCorrect,
+          similarityScore
+        };
+      })
+    );
+
     const { data, error } = await supabase
       .from('test_results')
       .insert({
         test_id: result.testId,
         user_id: result.userId,
         answers: result.answers,
-        score: result.score
+        score: result.score,
+        detailed_results: detailedResults
       })
       .select()
       .single();
@@ -126,7 +154,8 @@ export class TestService {
       userId: data.user_id,
       answers: data.answers,
       score: data.score,
-      completedAt: new Date(data.completed_at)
+      completedAt: new Date(data.completed_at),
+      detailedResults: data.detailed_results
     };
   }
 
@@ -149,7 +178,8 @@ export class TestService {
       userId: result.user_id,
       answers: result.answers,
       score: result.score,
-      completedAt: new Date(result.completed_at)
+      completedAt: new Date(result.completed_at),
+      detailedResults: result.detailed_results
     }));
   }
 

@@ -11,7 +11,8 @@ export interface Question {
   question: string;
   options: string[];
   correctAnswer: number;
-  type: 'multiple-choice' | 'true-false' | 'short-answer';
+  type: 'multiple-choice' | 'true-false' | 'short-answer' | 'fill-in-blank';
+  expectedAnswer?: string; // For short-answer and fill-in-blank questions
 }
 
 export interface Test {
@@ -30,7 +31,14 @@ export interface TestResult {
   id: string;
   testId: string;
   userId: string;
-  answers: Record<string, number>;
+  answers: Record<string, number | string>; // Support both numeric and text answers
   score: number;
   completedAt: Date;
+  detailedResults?: {
+    questionId: string;
+    userAnswer: number | string;
+    correctAnswer: number | string;
+    isCorrect: boolean;
+    similarityScore?: number; // For AI-checked answers
+  }[];
 }

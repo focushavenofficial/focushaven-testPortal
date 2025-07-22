@@ -4,13 +4,13 @@ import { Clock, ArrowLeft, ArrowRight, CheckCircle, AlertCircle } from 'lucide-r
 
 interface TestTakingProps {
   test: Test;
-  onSubmit: (testId: string, answers: Record<string, number>, score: number) => void;
+  onSubmit: (testId: string, answers: Record<string, number | string>, score: number) => void;
   onBack: () => void;
 }
 
 const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, onBack }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [answers, setAnswers] = useState<Record<string, number | string>>({});
   const [timeLeft, setTimeLeft] = useState(test.duration * 60); // Convert to seconds
   const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
 
@@ -34,18 +34,28 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, onBack }) => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleAnswerSelect = (questionId: string, answerIndex: number) => {
+  const handleAnswerSelect = (questionId: string, answer: number | string) => {
     setAnswers(prev => ({
       ...prev,
-      [questionId]: answerIndex
+      [questionId]: answer
     }));
   };
 
   const calculateScore = () => {
     let correct = 0;
     test.questions.forEach(question => {
-      if (answers[question.id] === question.correctAnswer) {
-        correct++;
+      const userAnswer = answers[question.id];
+      if (question.type === 'multiple-choice' || question.type === 'true-false') {
+        if (userAnswer === question.correctAnswer) {
+          correct++;
+        }
+      } else if (question.type === 'short-answer' || question.type === 'fill-in-blank') {
+        // For text answers, we'll do a basic check here and let the server do AI checking
+        if (question.expectedAnswer && typeof userAnswer === 'string') {
+          if (userAnswer.toLowerCase().trim() === question.expectedAnswer.toLowerCase().trim()) {
+            correct++;
+          }
+        }
       }
     });
     return Math.round((correct / test.questions.length) * 100);
@@ -122,6 +132,7 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, onBack }) => {
                 {test.questions[currentQuestion].question}
               </h2>
               
+              {test.questions[currentQuestion].type === 'multiple-choice' && (
               <div className="space-y-3">
                 {test.questions[currentQuestion].options.map((option, index) => (
                   <label
@@ -140,6 +151,32 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, onBack }) => {
                   </label>
                 ))}
               </div>
+              )}
+
+              {test.questions[currentQuestion].type === 'short-answer' && (
+                <div>
+                  <textarea
+                    value={answers[test.questions[currentQuestion].id] as string || ''}
+                    onChange={(e) => handleAnswerSelect(test.questions[currentQuestion].id, e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={4}
+                    placeholder="Enter your answer here..."
+                  />
+                </div>
+              )}
+
+              {test.questions[currentQuestion].type === 'fill-in-blank' && (
+                <div>
+                  <p className="text-gray-600 mb-3">Fill in the blank:</p>
+                  <input
+                    type="text"
+                    value={answers[test.questions[currentQuestion].id] as string || ''}
+                    onChange={(e) => handleAnswerSelect(test.questions[currentQuestion].id, e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter your answer..."
+                  />
+                </div>
+              )}
             </div>
           </div>
 
@@ -187,7 +224,7 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, onBack }) => {
                 className={`w-8 h-8 rounded-full text-sm font-medium transition-colors ${
                   index === currentQuestion
                     ? 'bg-blue-600 text-white'
-                    : answers[test.questions[index].id] !== undefined
+                    : answers[test.questions[index].id] !== undefined && answers[test.questions[index].id] !== ''
                     ? 'bg-green-100 text-green-800'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}

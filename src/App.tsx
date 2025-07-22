@@ -102,19 +102,22 @@ function App() {
     setCurrentView('test');
   };
 
-  const handleSubmitTest = async (testId: string, answers: Record<string, number>, score: number) => {
+  const handleSubmitTest = async (testId: string, answers: Record<string, number | string>, score: number) => {
     if (!currentUser) return;
     
     setLoading(true);
     setError(null);
     
     try {
+      const test = tests.find(t => t.id === testId);
+      if (!test) throw new Error('Test not found');
+
       const result = await TestService.submitTestResult({
         testId,
         userId: currentUser.id,
         answers,
         score
-      });
+      }, test);
       
       setResults(prev => [result, ...prev]);
       setCurrentView('results');

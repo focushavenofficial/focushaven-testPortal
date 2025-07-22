@@ -18,17 +18,25 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
     question: '',
     options: ['', '', '', ''],
     correctAnswer: 0,
-    type: 'multiple-choice'
+    type: 'multiple-choice',
+    expectedAnswer: ''
   });
 
   const handleAddQuestion = () => {
-    if (currentQuestion.question && currentQuestion.options?.every(opt => opt.trim())) {
+    const isValidQuestion = currentQuestion.question && (
+      (currentQuestion.type === 'multiple-choice' && currentQuestion.options?.every(opt => opt.trim())) ||
+      (currentQuestion.type === 'short-answer' && currentQuestion.expectedAnswer?.trim()) ||
+      (currentQuestion.type === 'fill-in-blank' && currentQuestion.expectedAnswer?.trim())
+    );
+
+    if (isValidQuestion) {
       const newQuestion: Question = {
         id: Date.now().toString(),
         question: currentQuestion.question,
-        options: currentQuestion.options,
+        options: currentQuestion.options || [],
         correctAnswer: currentQuestion.correctAnswer || 0,
-        type: 'multiple-choice'
+        type: currentQuestion.type || 'multiple-choice',
+        expectedAnswer: currentQuestion.expectedAnswer
       };
       
       setQuestions([...questions, newQuestion]);
@@ -36,7 +44,8 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
         question: '',
         options: ['', '', '', ''],
         correctAnswer: 0,
-        type: 'multiple-choice'
+        type: 'multiple-choice',
+        expectedAnswer: ''
       });
     }
   };
@@ -174,6 +183,28 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
             
             <div className="space-y-4">
               <div>
+                <label htmlFor="questionType" className="block text-sm font-medium text-gray-700 mb-2">
+                  Question Type
+                </label>
+                <select
+                  id="questionType"
+                  value={currentQuestion.type}
+                  onChange={(e) => setCurrentQuestion({ 
+                    ...currentQuestion, 
+                    type: e.target.value as Question['type'],
+                    options: e.target.value === 'multiple-choice' ? ['', '', '', ''] : [],
+                    correctAnswer: 0,
+                    expectedAnswer: ''
+                  })}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="multiple-choice">Multiple Choice</option>
+                  <option value="short-answer">Short Answer</option>
+                  <option value="fill-in-blank">Fill in the Blank</option>
+                </select>
+              </div>
+
+              <div>
                 <label htmlFor="question" className="block text-sm font-medium text-gray-700 mb-2">
                   Question
                 </label>
@@ -187,6 +218,7 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                 />
               </div>
               
+              {currentQuestion.type === 'multiple-choice' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Answer Options
@@ -215,6 +247,26 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                   ))}
                 </div>
               </div>
+              )}
+
+              {(currentQuestion.type === 'short-answer' || currentQuestion.type === 'fill-in-blank') && (
+                <div>
+                  <label htmlFor="expectedAnswer" className="block text-sm font-medium text-gray-700 mb-2">
+                    Expected Answer
+                  </label>
+                  <input
+                    type="text"
+                    id="expectedAnswer"
+                    value={currentQuestion.expectedAnswer || ''}
+                    onChange={(e) => setCurrentQuestion({ ...currentQuestion, expectedAnswer: e.target.value })}
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder={currentQuestion.type === 'fill-in-blank' ? 'Enter the word/phrase that fills the blank' : 'Enter the expected answer'}
+                  />
+                  <p className="mt-1 text-sm text-gray-500">
+                    AI will check similarity between student answers and this expected answer
+                  </p>
+                </div>
+              )}
               
               <button
                 type="button"
@@ -242,6 +294,7 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                         <h3 className="font-medium text-gray-900 mb-2">
                           {index + 1}. {question.question}
                         </h3>
+                        {question.type === 'multiple-choice' && (
                         <div className="space-y-1">
                           {question.options.map((option, optIndex) => (
                             <div key={optIndex} className="flex items-center text-sm">
@@ -254,6 +307,18 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                             </div>
                           ))}
                         </div>
+                        )}
+                        {(question.type === 'short-answer' || question.type === 'fill-in-blank') && (
+                          <div className="mt-2">
+                            <div className="text-sm text-gray-600">
+                              <span className="font-medium">Type:</span> {question.type === 'short-answer' ? 'Short Answer' : 'Fill in the Blank'}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              <span className="font-medium">Expected Answer:</span> {question.expectedAnswer}
+                            </div>
+                          </div>
+                        )}
+                        <div className="mt-1 text-xs text-gray-500 capitalize">{question.type.replace('-', ' ')}</div>
                       </div>
                       <button
                         type="button"
