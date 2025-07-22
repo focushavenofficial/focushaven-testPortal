@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { BookOpen, LogIn, AlertCircle } from 'lucide-react';
+import { BookOpen, User, Lock, AlertCircle } from 'lucide-react';
+import { AstraAuthService } from '../services/astraAuthService';
 
 interface LoginPageProps {
   onLogin: (userId: string, passcode: string) => Promise<boolean>;
@@ -8,119 +9,98 @@ interface LoginPageProps {
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [userId, setUserId] = useState('');
   const [passcode, setPasscode] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
+  const [isLoading, setIsLoading] = useState(false);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userId || !passcode) {
-      setError('Please enter both User ID and Passcode');
-      return;
-    }
-
-    setLoading(true);
     setError('');
+    setIsLoading(true);
 
     try {
       const success = await onLogin(userId, passcode);
       if (!success) {
         setError('Invalid credentials. Please try again.');
+      } else {
+        // ✅ success login - maybe redirect or show message
+        console.log('Login successful!');
       }
-    } catch (error) {
+    } catch (err) {
+      console.error('Login error:', err);
       setError('Login failed. Please try again.');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full space-y-8">
-        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
-          {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-100 flex items-center justify-center px-4">
+      <div className="max-w-md w-full">
+        <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <div className="bg-blue-600 p-3 rounded-full">
-                <BookOpen className="h-8 w-8 text-white" />
-              </div>
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full mb-4">
+              <BookOpen className="w-8 h-8 text-yellow-950" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-              Focus Haven
-            </h1>
-            <p className="text-base sm:text-lg text-gray-600 mb-1">Test Portal</p>
-            <p className="text-sm text-gray-500">Sign in to access your tests</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">FH TEST PORTAL</h1>
+            <p className="text-gray-600 mb-2">Enter your credentials to access the platform</p>
+            <p className="text-sm text-gray-500">Class-based test access system</p>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <div className="flex items-center">
-                <AlertCircle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0" />
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="userId" className="block text-sm font-medium text-gray-700 mb-2">
                 User ID
               </label>
-              <input
-                type="text"
-                id="userId"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
-                placeholder="Enter your User ID"
-                disabled={loading}
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="userId"
+                  type="text"
+                  value={userId}
+                  onChange={(e) => setUserId(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  placeholder="Enter your User ID"
+                  required
+                />
+              </div>
             </div>
 
             <div>
               <label htmlFor="passcode" className="block text-sm font-medium text-gray-700 mb-2">
                 Passcode
               </label>
-              <input
-                type="password"
-                id="passcode"
-                value={passcode}
-                onChange={(e) => setPasscode(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
-                placeholder="Enter your passcode"
-                disabled={loading}
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="passcode"
+                  type="password"
+                  value={passcode}
+                  onChange={(e) => setPasscode(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  placeholder="Enter your Passcode"
+                  required
+                />
+              </div>
             </div>
+
+            {error && (
+              <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
+                <AlertCircle className="h-5 w-5" />
+                <span className="text-sm">{error}</span>
+              </div>
+            )}
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-base"
+              disabled={isLoading}
+              className="w-full bg-yellow-950 text-white py-3 rounded-lg font-medium hover:bg-yellow-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Signing in...
-                </div>
-              ) : (
-                <div className="flex items-center justify-center">
-                  <LogIn className="h-5 w-5 mr-2" />
-                  Sign In
-                </div>
-              )}
+              {isLoading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
-
-          {/* Footer */}
-          <div className="mt-8 text-center">
-            <p className="text-xs text-gray-500">
-              Focus Haven Test Portal © 2024
-            </p>
-            <p className="text-xs text-gray-400 mt-1">
-              For ICSE Class 9 & 10 Students
-            </p>
-          </div>
         </div>
       </div>
     </div>
