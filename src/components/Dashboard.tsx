@@ -64,11 +64,11 @@ const Dashboard: React.FC<DashboardProps> = ({
               <BookOpen className="h-8 w-8 text-amber-900" />
               <h1 className="ml-2 text-xl font-bold text-gray-900">Test Portal</h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-600">
-                Welcome, <span className="font-medium text-gray-900">{user.name}</span>
+            <div className="flex items-center space-x-3">
+              <div className="hidden md:block text-sm text-gray-600">
+                Welcome, <span className="font-medium text-gray-900">{user.name.split(' ')[0]}</span>
               </div>
-              <div className="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">
+              <div className="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full hidden md:block">
                 {user.role}
               </div>
               <button
@@ -76,7 +76,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                 className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
                 <LogOut className="h-4 w-4 mr-2" />
-                Logout
+                <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
           </div>
@@ -84,13 +84,13 @@ const Dashboard: React.FC<DashboardProps> = ({
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Greeting */}
-        <div className="mb-8">
+        <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900">
             {getGreeting()}, {user.name}!
           </h2>
-          <p className="text-gray-600 mt-1">
+          <p className="text-base text-gray-600 mt-1">
             {user.role === 'student' ? 'Ready to take some tests?' : 
              user.role === 'teacher' ? 'Manage your tests and view student progress.' :
              'Monitor the entire platform and user activities.'}
@@ -98,7 +98,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -143,11 +143,11 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
           {(user.role === 'teacher' || user.role === 'admin') && (
             <button
               onClick={onCreateTest}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
+              className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
             >
               <Plus className="h-4 w-4 mr-2" />
               Create New Test
@@ -156,7 +156,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           
           <button
             onClick={onViewResults}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
+            className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
           >
             <BarChart3 className="h-4 w-4 mr-2" />
             View Results
@@ -180,7 +180,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             <div className="divide-y divide-gray-200">
               {userTests.map((test) => (
                 <div key={test.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-3 lg:space-y-0">
                     <div className="flex-1">
                       <div className="flex items-center">
                         <h4 className="text-lg font-medium text-gray-900">{test.title}</h4>
@@ -190,30 +190,36 @@ const Dashboard: React.FC<DashboardProps> = ({
                           {test.isActive ? 'Active' : 'Inactive'}
                         </div>
                       </div>
-                      <p className="text-gray-600 mt-1">{test.description}</p>
-                      <div className="flex items-center text-sm text-gray-500 mt-2">
-                        <Clock className="h-4 w-4 mr-1" />
+                      <p className="text-base text-gray-600 mt-1">{test.description}</p>
+                      <div className="flex flex-wrap items-center text-sm text-gray-500 mt-2 gap-x-2">
+                        <div className="flex items-center">
+                          <Clock className="h-4 w-4 mr-1" />
                         {test.duration} minutes
-                        <span className="mx-2">•</span>
+                        </div>
+                        <span>•</span>
+                        <div>
                         {test.questions.length} questions
-                        <span className="mx-2">•</span>
+                        </div>
+                        <span>•</span>
+                        <div>
                         Created {test.createdAt.toLocaleDateString()}
+                        </div>
                         {user.role === 'admin' && test.createdBy !== user.id && (
                           <>
-                            <span className="mx-2">•</span>
-                            <span className="text-blue-600">By: {test.createdBy}</span>
+                            <span>•</span>
+                            <div className="text-blue-600">By: {test.createdBy}</div>
                           </>
                         )}
                         {test.targetClass && (
                           <>
-                            <span className="mx-2">•</span>
-                            <span className="text-purple-600">Class {test.targetClass}</span>
+                            <span>•</span>
+                            <div className="text-purple-600">Class {test.targetClass}</div>
                           </>
                         )}
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center justify-end space-x-2">
                       {user.role === 'student' && test.isActive && (
                         <button
                           onClick={() => onStartTest(test)}
@@ -278,18 +284,18 @@ const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <div className="flex items-center mb-4">
               <Trash2 className="h-6 w-6 text-red-500 mr-2" />
               <h3 className="text-lg font-medium text-gray-900">Delete Test</h3>
             </div>
             
-            <p className="text-gray-600 mb-6">
+            <p className="text-base text-gray-600 mb-6">
               Are you sure you want to delete this test? This action cannot be undone and will also delete all associated test results.
             </p>
             
-            <div className="flex justify-end space-x-3">
+            <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
               <button
                 onClick={() => setShowDeleteConfirm(null)}
                 className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
