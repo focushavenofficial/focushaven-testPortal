@@ -58,26 +58,25 @@ const Dashboard: React.FC<DashboardProps> = ({
     <div className="min-h-screen bg-lime-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <BookOpen className="h-8 w-8 text-amber-900" />
-              <h1 className="ml-2 text-lg sm:text-xl font-bold text-gray-900">Test Portal</h1>
+              <h1 className="ml-2 text-xl font-bold text-gray-900">Test Portal</h1>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="hidden sm:block text-sm text-gray-600">
+            <div className="flex items-center space-x-3">
+              <div className="hidden md:block text-sm text-gray-600">
                 Welcome, <span className="font-medium text-gray-900">{user.name.split(' ')[0]}</span>
               </div>
-              <div className="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full hidden sm:block">
+              <div className="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full hidden md:block">
                 {user.role}
               </div>
               <button
                 onClick={onLogout}
-                className="inline-flex items-center px-2 sm:px-3 py-2 border border-gray-300 shadow-sm text-xs sm:text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Logout</span>
-                <span className="sm:hidden">Exit</span>
               </button>
             </div>
           </div>
@@ -85,13 +84,13 @@ const Dashboard: React.FC<DashboardProps> = ({
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Greeting */}
-        <div className="mb-4 sm:mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">
             {getGreeting()}, {user.name}!
           </h2>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">
+          <p className="text-base text-gray-600 mt-1">
             {user.role === 'student' ? 'Ready to take some tests?' : 
              user.role === 'teacher' ? 'Manage your tests and view student progress.' :
              'Monitor the entire platform and user activities.'}
@@ -99,14 +98,14 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <FileText className="h-8 w-8 text-amber-900" />
               </div>
               <div className="ml-4">
-                <div className="text-xl sm:text-2xl font-bold text-gray-900">{userTests.length}</div>
+                <div className="text-2xl font-bold text-gray-900">{userTests.length}</div>
                 <div className="text-sm text-gray-600">
                   {user.role === 'student' ? 'Available Tests' : 'Total Tests'}
                 </div>
@@ -120,7 +119,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                 <Clock className="h-8 w-8 text-green-600" />
               </div>
               <div className="ml-4">
-                <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                <div className="text-2xl font-bold text-gray-900">
                   {userTests.filter(t => t.isActive).length}
                 </div>
                 <div className="text-sm text-gray-600">Active Tests</div>
@@ -134,7 +133,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                 <Users className="h-8 w-8 text-purple-600" />
               </div>
               <div className="ml-4">
-                <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                <div className="text-2xl font-bold text-gray-900">
                   {user.role === 'student' ? 'Student' : user.role === 'teacher' ? 'Teacher' : 'Admin'}
                 </div>
                 <div className="text-sm text-gray-600">Your Role</div>
@@ -144,11 +143,11 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
           {(user.role === 'teacher' || user.role === 'admin') && (
             <button
               onClick={onCreateTest}
-              className="inline-flex items-center justify-center px-3 sm:px-4 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
+              className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
             >
               <Plus className="h-4 w-4 mr-2" />
               Create New Test
@@ -157,7 +156,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           
           <button
             onClick={onViewResults}
-            className="inline-flex items-center justify-center px-3 sm:px-4 py-2 border border-gray-300 text-xs sm:text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
+            className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
           >
             <BarChart3 className="h-4 w-4 mr-2" />
             View Results
@@ -167,7 +166,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         {/* Tests Grid */}
         <div className="bg-white rounded-lg shadow-sm">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-base sm:text-lg font-medium text-gray-900">
+            <h3 className="text-lg font-medium text-gray-900">
               {user.role === 'student' ? 'Available Tests' : 'Your Tests'}
             </h3>
           </div>
@@ -180,18 +179,18 @@ const Dashboard: React.FC<DashboardProps> = ({
           ) : (
             <div className="divide-y divide-gray-200">
               {userTests.map((test) => (
-                <div key={test.id} className="px-3 sm:px-6 py-4 hover:bg-gray-50 transition-colors">
+                <div key={test.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-3 lg:space-y-0">
                     <div className="flex-1">
                       <div className="flex items-center">
-                        <h4 className="text-base sm:text-lg font-medium text-gray-900">{test.title}</h4>
+                        <h4 className="text-lg font-medium text-gray-900">{test.title}</h4>
                         <div className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${
                           test.isActive ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-800'
                         }`}>
                           {test.isActive ? 'Active' : 'Inactive'}
                         </div>
                       </div>
-                      <p className="text-sm sm:text-base text-gray-600 mt-1">{test.description}</p>
+                      <p className="text-base text-gray-600 mt-1">{test.description}</p>
                       <div className="flex flex-wrap items-center text-sm text-gray-500 mt-2 gap-x-2">
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 mr-1" />
@@ -224,10 +223,9 @@ const Dashboard: React.FC<DashboardProps> = ({
                       {user.role === 'student' && test.isActive && (
                         <button
                           onClick={() => onStartTest(test)}
-                          className="inline-flex items-center px-3 sm:px-4 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
                         >
-                          <span className="hidden sm:inline">Start Test</span>
-                          <span className="sm:hidden">Start</span>
+                          Start Test
                         </button>
                       )}
                       
@@ -286,27 +284,27 @@ const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-3 sm:px-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <div className="flex items-center mb-4">
               <Trash2 className="h-6 w-6 text-red-500 mr-2" />
-              <h3 className="text-base sm:text-lg font-medium text-gray-900">Delete Test</h3>
+              <h3 className="text-lg font-medium text-gray-900">Delete Test</h3>
             </div>
             
-            <p className="text-sm sm:text-base text-gray-600 mb-6">
+            <p className="text-base text-gray-600 mb-6">
               Are you sure you want to delete this test? This action cannot be undone and will also delete all associated test results.
             </p>
             
             <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
               <button
                 onClick={() => setShowDeleteConfirm(null)}
-                className="px-3 sm:px-4 py-2 border border-gray-300 text-xs sm:text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDeleteTest(showDeleteConfirm)}
-                className="px-3 sm:px-4 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
               >
                 Delete Test
               </button>
