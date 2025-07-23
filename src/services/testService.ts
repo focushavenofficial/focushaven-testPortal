@@ -319,7 +319,7 @@ export class TestService {
       reviewedAt: request.reviewed_at ? new Date(request.reviewed_at) : undefined,
       reviewNotes: request.review_notes
     }));
-  }
+  };
 }
 
  static async updateReviewRequest(requestId: string, updates: {
