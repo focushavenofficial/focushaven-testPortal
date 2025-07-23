@@ -1,6 +1,6 @@
 import React from 'react';
 import { User, Test } from '../types';
-import { BookOpen, Plus, BarChart3, LogOut, Clock, Users, FileText, MoreVertical, Edit, Trash2, EyeOff, Eye } from 'lucide-react';
+import { BookOpen, Plus, BarChart3, LogOut, Clock, Users, FileText, MoreVertical, Edit, Trash2, EyeOff, Eye, MessageSquare } from 'lucide-react';
 
 interface DashboardProps {
   user: User;
@@ -9,6 +9,7 @@ interface DashboardProps {
   onCreateTest: () => void;
   onStartTest: (test: Test) => void;
   onViewResults: () => void;
+  onViewReviewRequests?: () => void;
   onUpdateTest?: (testId: string, updates: Partial<Test>) => void;
   onDeleteTest?: (testId: string) => void;
 }
@@ -20,6 +21,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   onCreateTest,
   onStartTest,
   onViewResults,
+  onViewReviewRequests,
   onUpdateTest,
   onDeleteTest
 }) => {
@@ -161,6 +163,16 @@ const Dashboard: React.FC<DashboardProps> = ({
             <BarChart3 className="h-4 w-4 mr-2" />
             View Results
           </button>
+          
+          {(user.role === 'teacher' || user.role === 'admin') && onViewReviewRequests && (
+            <button
+              onClick={onViewReviewRequests}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
+            >
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Review Requests
+            </button>
+          )}
         </div>
 
         {/* Tests Grid */}

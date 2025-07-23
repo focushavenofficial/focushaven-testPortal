@@ -5,13 +5,14 @@ import TestTaking from './components/TestTaking';
 import CreateTest from './components/CreateTest';
 import Results from './components/Results';
 import TestReview from './components/TestReview';
+import ReviewRequests from './components/ReviewRequests';
 import { User, Test, TestResult } from './types';
 import { TestService } from './services/testService';
 import { AstraAuthService } from './services/astraAuthService';
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'test' | 'create' | 'results' | 'review'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'test' | 'create' | 'results' | 'review' | 'review-requests'>('dashboard');
   const [selectedTest, setSelectedTest] = useState<Test | null>(null);
   const [selectedResult, setSelectedResult] = useState<TestResult | null>(null);
   const [tests, setTests] = useState<Test[]>([]);
@@ -215,6 +216,7 @@ function App() {
           onViewResults={() => setCurrentView('results')}
           onUpdateTest={handleUpdateTest}
           onDeleteTest={handleDeleteTest}
+          onViewReviewRequests={() => setCurrentView('review-requests')}
         />
       )}
       
@@ -250,6 +252,13 @@ function App() {
           test={tests.find(t => t.id === selectedResult.testId)!}
           currentUser={currentUser}
           onBack={() => setCurrentView('results')}
+        />
+      )}
+      
+      {currentView === 'review-requests' && (
+        <ReviewRequests
+          currentUser={currentUser}
+          onBack={() => setCurrentView('dashboard')}
         />
       )}
     </div>

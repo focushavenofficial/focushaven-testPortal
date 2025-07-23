@@ -321,3 +321,26 @@ export class TestService {
     }));
   }
 }
+
+ static async updateReviewRequest(requestId: string, updates: {
+   status: 'approved' | 'rejected';
+   reviewedBy: string;
+   reviewNotes?: string;
+ }): Promise<void> {
+   try {
+     const { error } = await supabase
+       .from('review_requests')
+       .update({
+         status: updates.status,
+         reviewed_by: updates.reviewedBy,
+         reviewed_at: new Date().toISOString(),
+         review_notes: updates.reviewNotes
+       })
+       .eq('id', requestId);
+
+     if (error) throw error;
+   } catch (error) {
+     console.error('Error updating review request:', error);
+     throw error;
+   }
+ }
