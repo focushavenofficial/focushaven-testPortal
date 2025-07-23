@@ -114,17 +114,40 @@ export class TestService {
         const userAnswer = result.answers[question.id];
         let isCorrect = false;
         let similarityScore: number | undefined;
+        let marksAwarded = 0;
+        const totalMarks = question.marks || 1;
 
         if (question.type === 'multiple-choice' || question.type === 'true-false') {
-          isCorrect = userAnswer === question.correctAnswer;
+          if (userAnswer === question.correctAnswer) {
+            isCorrect = true;
+            marksAwarded = totalMarks;
+          }
         } else if (question.type === 'short-answer' || question.type === 'fill-in-blank') {
           if (question.expectedAnswer && typeof userAnswer === 'string') {
             similarityScore = await AIService.checkSimilarity(userAnswer, question.expectedAnswer);
             isCorrect = await AIService.isAnswerCorrect(userAnswer, question.expectedAnswer);
+            
+            // Award marks based on similarity score for short answer questions
+            if (question.type === 'short-answer' && similarityScore !== undefined) {
+              if (similarityScore >= 0.9) {
+                marksAwarded = totalMarks;
+              } else if (similarityScore >= 0.7) {
+                marksAwarded = Math.round(totalMarks * 0.75);
+              } else if (similarityScore >= 0.5) {
+                marksAwarded = Math.round(totalMarks * 0.5);
+              } else if (similarityScore >= 0.3) {
+                marksAwarded = Math.round(totalMarks * 0.25);
+              }
+            } else if (isCorrect) {
+              marksAwarded = totalMarks;
+            }
           }
         } else if (question.type === 'real-number') {
           if (question.correctNumber !== undefined && typeof userAnswer === 'string') {
-            isCorrect = AIService.checkRealNumber(userAnswer, question.correctNumber);
+            if (AIService.checkRealNumber(userAnswer, question.correctNumber)) {
+              isCorrect = true;
+              marksAwarded = totalMarks;
+            }
           }
         }
 
@@ -133,14 +156,16 @@ export class TestService {
           userAnswer,
           correctAnswer: question.expectedAnswer || question.correctNumber || question.correctAnswer,
           isCorrect,
-          similarityScore
+          similarityScore,
+          marksAwarded
         };
       })
     );
 
-    // Calculate score based on detailed results
-    const correctCount = detailedResults.filter(r => r.isCorrect).length;
-    const calculatedScore = Math.round((correctCount / test.questions.length) * 100);
+    // Calculate score based on marks awarded
+    const totalMarksAwarded = detailedResults.reduce((sum, r) => sum + (r.marksAwarded || 0), 0);
+    const totalPossibleMarks = test.questions.reduce((sum, q) => sum + (q.marks || 1), 0);
+    const calculatedScore = Math.round((totalMarksAwarded / totalPossibleMarks) * 100);
 
     const { data, error } = await supabase
       .from('test_results')
@@ -240,5 +265,59 @@ export class TestService {
       .eq('id', testId);
 
     if (error) throw error;
+  }
+
+  static async createReviewRequest(request: Omit<ReviewRequest, 'id' | 'createdAt'>): Promise<ReviewRequest> {
+    const { data, error } = await supabase
+      .from('review_requests')
+      .insert({
+        test_result_id: request.testResultId,
+        question_id: request.questionId,
+        user_id: request.userId,
+        reason: request.reason,
+        status: request.status
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return {
+      id: data.id,
+      testResultId: data.test_result_id,
+      questionId: data.question_id,
+      userId: data.user_id,
+      reason: data.reason,
+      status: data.status,
+      createdAt: new Date(data.created_at),
+      reviewedBy: data.reviewed_by,
+      reviewedAt: data.reviewed_at ? new Date(data.reviewed_at) : undefined,
+      reviewNotes: data.review_notes
+    };
+  }
+
+  static async getReviewRequests(userRole: string, userId?: string): Promise<ReviewRequest[]> {
+    let query = supabase.from('review_requests').select('*');
+
+    if (userRole === 'student') {
+      query = query.eq('user_id', userId);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return data.map(request => ({
+      id: request.id,
+      testResultId: request.test_result_id,
+      questionId: request.question_id,
+      userId: request.user_id,
+      reason: request.reason,
+      status: request.status,
+      createdAt: new Date(request.created_at),
+      reviewedBy: request.reviewed_by,
+      reviewedAt: request.reviewed_at ? new Date(request.reviewed_at) : undefined,
+      reviewNotes: request.review_notes
+    }));
   }
 }

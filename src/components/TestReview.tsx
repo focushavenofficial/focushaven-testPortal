@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { TestResult, Test, User } from '../types';
-import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Eye, User as UserIcon } from 'lucide-react';
+import { TestResult, Test, User, ReviewRequest } from '../types';
+import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Eye, User as UserIcon, MessageSquare } from 'lucide-react';
+import { TestService } from '../services/testService';
 
 interface TestReviewProps {
   result: TestResult;
@@ -11,6 +12,9 @@ interface TestReviewProps {
 
 const TestReview: React.FC<TestReviewProps> = ({ result, test, currentUser, onBack }) => {
   const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
+  const [showReviewModal, setShowReviewModal] = useState<string | null>(null);
+  const [reviewReason, setReviewReason] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   const getScoreColor = (score: number) => {
     if (score >= 90) return 'text-green-600';
@@ -28,6 +32,32 @@ const TestReview: React.FC<TestReviewProps> = ({ result, test, currentUser, onBa
 
   const correctAnswers = result.detailedResults?.filter(r => r.isCorrect).length || 0;
   const totalQuestions = test.questions.length;
+  const totalMarksAwarded = result.detailedResults?.reduce((sum, r) => sum + (r.marksAwarded || 0), 0) || 0;
+  const totalPossibleMarks = test.questions.reduce((sum, q) => sum + (q.marks || 1), 0);
+
+  const handleRequestReview = async (questionId: string) => {
+    if (!reviewReason.trim()) return;
+    
+    setSubmittingReview(true);
+    try {
+      await TestService.createReviewRequest({
+        testResultId: result.id,
+        questionId,
+        userId: currentUser.id,
+        reason: reviewReason,
+        status: 'pending'
+      });
+      
+      setShowReviewModal(null);
+      setReviewReason('');
+      alert('Review request submitted successfully!');
+    } catch (error) {
+      console.error('Error submitting review request:', error);
+      alert('Failed to submit review request. Please try again.');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -61,8 +91,8 @@ const TestReview: React.FC<TestReviewProps> = ({ result, test, currentUser, onBa
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{correctAnswers}/{totalQuestions}</div>
-              <div className="text-sm text-gray-600">Correct Answers</div>
+              <div className="text-2xl font-bold text-gray-900">{totalMarksAwarded}/{totalPossibleMarks}</div>
+              <div className="text-sm text-gray-600">Marks Awarded</div>
             </div>
             <div className="text-center">
               <div className={`text-2xl font-bold ${getScoreColor(result.score)}`}>{result.score}%</div>
@@ -75,6 +105,10 @@ const TestReview: React.FC<TestReviewProps> = ({ result, test, currentUser, onBa
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-900">{result.completedAt.toLocaleTimeString()}</div>
               <div className="text-sm text-gray-600">Completed At</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-gray-900">{correctAnswers}/{totalQuestions}</div>
+              <div className="text-sm text-gray-600">Correct Answers</div>
             </div>
           </div>
 
@@ -93,6 +127,8 @@ const TestReview: React.FC<TestReviewProps> = ({ result, test, currentUser, onBa
             const detailedResult = result.detailedResults?.find(r => r.questionId === question.id);
             const userAnswer = result.answers[question.id];
             const isCorrect = detailedResult?.isCorrect || false;
+            const marksAwarded = detailedResult?.marksAwarded || 0;
+            const totalMarks = question.marks || 1;
             
             return (
               <div key={question.id} className="bg-white rounded-lg shadow-sm">
@@ -111,6 +147,9 @@ const TestReview: React.FC<TestReviewProps> = ({ result, test, currentUser, onBa
                         <span className={`ml-2 text-sm font-medium ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
                           {isCorrect ? 'Correct' : 'Incorrect'}
                         </span>
+                        <span className="ml-2 text-sm text-gray-600">
+                          ({marksAwarded}/{totalMarks} marks)
+                        </span>
                         {detailedResult?.similarityScore && (
                           <span className="ml-2 text-xs text-gray-500">
                             (Similarity: {Math.round(detailedResult.similarityScore * 100)}%)
@@ -119,6 +158,18 @@ const TestReview: React.FC<TestReviewProps> = ({ result, test, currentUser, onBa
                       </div>
                       <h3 className="text-lg text-gray-900 mb-4">{question.question}</h3>
                     </div>
+                    
+                    {/* Review Request Button for Students */}
+                    {currentUser.role === 'student' && !isCorrect && 
+                     (question.type === 'short-answer' || question.type === 'fill-in-blank') && (
+                      <button
+                        onClick={() => setShowReviewModal(question.id)}
+                        className="inline-flex items-center px-3 py-1 border border-orange-300 text-xs font-medium rounded-md text-orange-700 bg-orange-50 hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors"
+                      >
+                        <MessageSquare className="h-3 w-3 mr-1" />
+                        Request Review
+                      </button>
+                    )}
                   </div>
 
                   {/* Multiple Choice Questions */}
@@ -251,8 +302,8 @@ const TestReview: React.FC<TestReviewProps> = ({ result, test, currentUser, onBa
                         <div className="flex items-center text-sm text-gray-600">
                           <AlertCircle className="h-4 w-4 mr-2" />
                           <span>
-                            AI Similarity Score: {Math.round(detailedResult.similarityScore * 100)}%
-                            {detailedResult.similarityScore >= 0.8 ? ' (Accepted as correct)' : ' (Marked as incorrect)'}
+                            AI Similarity Score: {Math.round(detailedResult.similarityScore * 100)}% - 
+                            {marksAwarded > 0 ? ` ${marksAwarded}/${totalMarks} marks awarded` : ' No marks awarded'}
                           </span>
                         </div>
                       )}
@@ -268,7 +319,12 @@ const TestReview: React.FC<TestReviewProps> = ({ result, test, currentUser, onBa
         <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Performance Summary</h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="text-center p-4 bg-blue-50 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">{totalMarksAwarded}</div>
+              <div className="text-sm text-gray-600">Total Marks</div>
+            </div>
+            
             <div className="text-center p-4 bg-green-50 rounded-lg">
               <div className="text-2xl font-bold text-green-600">{correctAnswers}</div>
               <div className="text-sm text-gray-600">Correct Answers</div>
@@ -279,7 +335,7 @@ const TestReview: React.FC<TestReviewProps> = ({ result, test, currentUser, onBa
               <div className="text-sm text-gray-600">Incorrect Answers</div>
             </div>
             
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
+            <div className="text-center p-4 bg-purple-50 rounded-lg">
               <div className={`text-2xl font-bold ${getScoreColor(result.score)}`}>{result.score}%</div>
               <div className="text-sm text-gray-600">Overall Score</div>
             </div>
@@ -295,6 +351,49 @@ const TestReview: React.FC<TestReviewProps> = ({ result, test, currentUser, onBa
           </div>
         </div>
       </main>
+
+      {/* Review Request Modal */}
+      {showReviewModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center mb-4">
+              <MessageSquare className="h-6 w-6 text-orange-500 mr-2" />
+              <h3 className="text-lg font-medium text-gray-900">Request Review</h3>
+            </div>
+            
+            <p className="text-gray-600 mb-4">
+              Explain why you think your answer should be marked as correct:
+            </p>
+            
+            <textarea
+              value={reviewReason}
+              onChange={(e) => setReviewReason(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              rows={4}
+              placeholder="Provide your reasoning for the review request..."
+            />
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowReviewModal(null);
+                  setReviewReason('');
+                }}
+                className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleRequestReview(showReviewModal)}
+                disabled={!reviewReason.trim() || submittingReview}
+                className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {submittingReview ? 'Submitting...' : 'Submit Request'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

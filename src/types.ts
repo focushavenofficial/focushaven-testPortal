@@ -14,6 +14,7 @@ export interface Question {
   type: 'multiple-choice' | 'true-false' | 'short-answer' | 'fill-in-blank' | 'real-number';
   expectedAnswer?: string; // For short-answer and fill-in-blank questions
   correctNumber?: number; // For real-number questions
+  marks?: number; // Marks for the question (default 1)
 }
 
 export interface Test {
@@ -41,5 +42,19 @@ export interface TestResult {
     correctAnswer: number | string;
     isCorrect: boolean;
     similarityScore?: number; // For AI-checked answers
+    marksAwarded?: number; // Marks awarded for this question
   }[];
+}
+
+export interface ReviewRequest {
+  id: string;
+  testResultId: string;
+  questionId: string;
+  userId: string;
+  reason: string;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: Date;
+  reviewedBy?: string;
+  reviewedAt?: Date;
+  reviewNotes?: string;
 }

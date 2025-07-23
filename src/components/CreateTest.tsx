@@ -20,7 +20,8 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
     correctAnswer: 0,
     type: 'multiple-choice',
     expectedAnswer: '',
-    correctNumber: undefined
+    correctNumber: undefined,
+    marks: 1
   });
 
   const handleAddQuestion = () => {
@@ -40,7 +41,8 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
         correctAnswer: currentQuestion.correctAnswer || 0,
         type: currentQuestion.type || 'multiple-choice',
         expectedAnswer: currentQuestion.expectedAnswer,
-        correctNumber: currentQuestion.correctNumber
+        correctNumber: currentQuestion.correctNumber,
+        marks: currentQuestion.marks || 1
       };
       
       setQuestions([...questions, newQuestion]);
@@ -50,7 +52,8 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
         correctAnswer: 0,
         type: 'multiple-choice',
         expectedAnswer: '',
-        correctNumber: undefined
+        correctNumber: undefined,
+        marks: 1
       });
     }
   };
@@ -200,7 +203,8 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                     options: e.target.value === 'multiple-choice' ? ['', '', '', ''] : [],
                     correctAnswer: 0,
                     expectedAnswer: '',
-                    correctNumber: undefined
+                    correctNumber: undefined,
+                    marks: 1
                   })}
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
@@ -224,6 +228,27 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter your question here..."
                 />
+              </div>
+
+              <div>
+                <label htmlFor="marks" className="block text-sm font-medium text-gray-700 mb-2">
+                  Marks for this Question
+                </label>
+                <input
+                  type="number"
+                  id="marks"
+                  min="1"
+                  max="10"
+                  value={currentQuestion.marks || 1}
+                  onChange={(e) => setCurrentQuestion({ ...currentQuestion, marks: parseInt(e.target.value) || 1 })}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <p className="mt-1 text-sm text-gray-500">
+                  {currentQuestion.type === 'short-answer' 
+                    ? 'For short answers, partial marks will be awarded based on AI similarity score'
+                    : 'Full marks awarded for correct answers only'
+                  }
+                </p>
               </div>
               
               {currentQuestion.type === 'multiple-choice' && (
@@ -390,6 +415,9 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                             <div className="text-sm text-gray-600">
                               <span className="font-medium">Correct Answer:</span> {question.correctNumber}
                             </div>
+                            <div className="text-sm text-gray-600">
+                              <span className="font-medium">Marks:</span> {question.marks || 1}
+                            </div>
                           </div>
                         )}
                         {question.type === 'true-false' && (
@@ -400,9 +428,25 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                             <div className="text-sm text-gray-600">
                               <span className="font-medium">Correct Answer:</span> {question.correctAnswer === 1 ? 'True' : 'False'}
                             </div>
+                            <div className="text-sm text-gray-600">
+                              <span className="font-medium">Marks:</span> {question.marks || 1}
+                            </div>
                           </div>
                         )}
-                        <div className="mt-1 text-xs text-gray-500 capitalize">{question.type.replace('-', ' ')}</div>
+                        {(question.type === 'short-answer' || question.type === 'fill-in-blank') && (
+                          <div className="mt-2">
+                            <div className="text-sm text-gray-600">
+                              <span className="font-medium">Marks:</span> {question.marks || 1}
+                            </div>
+                          </div>
+                        )}
+                        {question.type === 'multiple-choice' && (
+                          <div className="mt-2">
+                            <div className="text-sm text-gray-600">
+                              <span className="font-medium">Marks:</span> {question.marks || 1}
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <button
                         type="button"
