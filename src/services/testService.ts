@@ -343,4 +343,58 @@ export class TestService {
       throw error;
     }
   }
+
+  static async updateTestResultMarks(testResultId: string, questionId: string, newMarks: number): Promise<void> {
+    try {
+      // First, get the current test result
+      const { data: testResult, error: fetchError } = await supabase
+        .from('test_results')
+        .select('*')
+        .eq('id', testResultId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Update the detailed results for the specific question
+      const updatedDetailedResults = testResult.detailed_results?.map((result: any) => {
+        if (result.questionId === questionId) {
+          return {
+            ...result,
+            marksAwarded: newMarks,
+            isCorrect: newMarks > 0
+          };
+        }
+        return result;
+      }) || [];
+
+      // Recalculate the total score
+      const totalMarksAwarded = updatedDetailedResults.reduce((sum: number, r: any) => sum + (r.marksAwarded || 0), 0);
+      
+      // Get the test to calculate total possible marks
+      const { data: test, error: testError } = await supabase
+        .from('tests')
+        .select('questions')
+        .eq('id', testResult.test_id)
+        .single();
+
+      if (testError) throw testError;
+
+      const totalPossibleMarks = test.questions.reduce((sum: number, q: any) => sum + (q.marks || 1), 0);
+      const newScore = Math.round((totalMarksAwarded / totalPossibleMarks) * 100);
+
+      // Update the test result with new detailed results and score
+      const { error: updateError } = await supabase
+        .from('test_results')
+        .update({
+          detailed_results: updatedDetailedResults,
+          score: newScore
+        })
+        .eq('id', testResultId);
+
+      if (updateError) throw updateError;
+    } catch (error) {
+      console.error('Error updating test result marks:', error);
+      throw error;
+    }
+  }
 }

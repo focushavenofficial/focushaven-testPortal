@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ReviewRequest, User, TestResult, Test } from '../types';
+import { ReviewRequest, User, TestResult, Test, Question } from '../types';
 import { ArrowLeft, MessageSquare, CheckCircle, XCircle, Clock, User as UserIcon, FileText } from 'lucide-react';
 import { TestService } from '../services/testService';
 
@@ -10,10 +10,13 @@ interface ReviewRequestsProps {
 
 const ReviewRequests: React.FC<ReviewRequestsProps> = ({ currentUser, onBack }) => {
   const [requests, setRequests] = useState<ReviewRequest[]>([]);
+  const [tests, setTests] = useState<Test[]>([]);
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<ReviewRequest | null>(null);
   const [reviewNotes, setReviewNotes] = useState('');
+  const [newMarks, setNewMarks] = useState<number>(0);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -23,8 +26,15 @@ const ReviewRequests: React.FC<ReviewRequestsProps> = ({ currentUser, onBack }) 
   const loadRequests = async () => {
     try {
       setLoading(true);
-      const data = await TestService.getReviewRequests(currentUser.role, currentUser.id);
-      setRequests(data);
+      const [requestsData, testsData, resultsData] = await Promise.all([
+        TestService.getReviewRequests(currentUser.role, currentUser.id),
+        TestService.getTests(currentUser.role, currentUser.id),
+        TestService.getTestResults(currentUser.role, currentUser.id)
+      ]);
+      
+      setRequests(requestsData);
+      setTests(testsData);
+      setTestResults(resultsData);
     } catch (err) {
       console.error('Error loading review requests:', err);
       setError('Failed to load review requests');
@@ -33,16 +43,27 @@ const ReviewRequests: React.FC<ReviewRequestsProps> = ({ currentUser, onBack }) 
     }
   };
 
-  const handleReviewRequest = async (requestId: string, status: 'approved' | 'rejected') => {
+  const handleReviewRequest = async (requestId: string, status: 'approved' | 'rejected', newMarksValue?: number) => {
     if (!selectedRequest) return;
     
     setSubmitting(true);
     try {
-      await TestService.updateReviewRequest(requestId, {
+      const updateData: any = {
         status,
         reviewedBy: currentUser.id,
         reviewNotes: reviewNotes.trim() || undefined
-      });
+      };
+
+      // If approved and new marks provided, update the test result
+      if (status === 'approved' && newMarksValue !== undefined) {
+        await TestService.updateTestResultMarks(
+          selectedRequest.testResultId,
+          selectedRequest.questionId,
+          newMarksValue
+        );
+      }
+
+      await TestService.updateReviewRequest(requestId, updateData);
       
       // Update local state
       setRequests(prev => prev.map(req => 
@@ -53,12 +74,29 @@ const ReviewRequests: React.FC<ReviewRequestsProps> = ({ currentUser, onBack }) 
       
       setSelectedRequest(null);
       setReviewNotes('');
+      setNewMarks(0);
     } catch (err) {
       console.error('Error updating review request:', err);
       setError('Failed to update review request');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const getQuestionDetails = (request: ReviewRequest) => {
+    const testResult = testResults.find(r => r.id === request.testResultId);
+    const test = tests.find(t => t.id === testResult?.testId);
+    const question = test?.questions.find(q => q.id === request.questionId);
+    const detailedResult = testResult?.detailedResults?.find(r => r.questionId === request.questionId);
+    
+    return { test, question, testResult, detailedResult };
+  };
+
+  const handleSelectRequest = (request: ReviewRequest) => {
+    setSelectedRequest(request);
+    const { question, detailedResult } = getQuestionDetails(request);
+    setNewMarks(detailedResult?.marksAwarded || 0);
+    setReviewNotes('');
   };
 
   const getStatusColor = (status: string) => {
@@ -212,7 +250,7 @@ const ReviewRequests: React.FC<ReviewRequestsProps> = ({ currentUser, onBack }) 
                     
                     <div className="flex space-x-2 ml-4">
                       <button
-                        onClick={() => setSelectedRequest(request)}
+                        onClick={() => handleSelectRequest(request)}
                         className="inline-flex items-center px-3 py-1 border border-blue-300 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                       >
                         <MessageSquare className="h-3 w-3 mr-1" />
@@ -288,45 +326,121 @@ const ReviewRequests: React.FC<ReviewRequestsProps> = ({ currentUser, onBack }) 
       {/* Review Modal */}
       {selectedRequest && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center mb-4">
               <MessageSquare className="h-6 w-6 text-blue-500 mr-2" />
               <h3 className="text-lg font-medium text-gray-900">Review Request</h3>
             </div>
             
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Student:</label>
-                <p className="text-gray-900">{selectedRequest.userId}</p>
-              </div>
+            {(() => {
+              const { test, question, testResult, detailedResult } = getQuestionDetails(selectedRequest);
+              const userAnswer = testResult?.answers[selectedRequest.questionId];
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Question ID:</label>
-                <p className="text-gray-900">{selectedRequest.questionId}</p>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Student's Reason:</label>
-                <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{selectedRequest.reason}</p>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Review Notes (Optional):</label>
-                <textarea
-                  value={reviewNotes}
-                  onChange={(e) => setReviewNotes(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Add notes about your decision..."
-                />
-              </div>
-            </div>
+              return (
+                <div className="space-y-6 mb-6">
+                  {/* Student Info */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Student:</label>
+                        <p className="text-gray-900 font-medium">{selectedRequest.userId}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Test:</label>
+                        <p className="text-gray-900">{test?.title || 'Unknown Test'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Question Details */}
+                  {question && (
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h4 className="text-lg font-medium text-gray-900 mb-3">Original Question</h4>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Question:</label>
+                          <p className="text-gray-900 bg-white p-3 rounded border">{question.question}</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Student's Answer:</label>
+                            <div className="bg-red-50 border border-red-200 p-3 rounded">
+                              <p className="text-gray-900">{userAnswer as string || 'No answer provided'}</p>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Expected Answer:</label>
+                            <div className="bg-green-50 border border-green-200 p-3 rounded">
+                              <p className="text-gray-900">{question.expectedAnswer || 'N/A'}</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {detailedResult?.similarityScore && (
+                          <div className="bg-yellow-50 border border-yellow-200 p-3 rounded">
+                            <p className="text-sm text-gray-700">
+                              <span className="font-medium">AI Similarity Score:</span> {Math.round(detailedResult.similarityScore * 100)}%
+                            </p>
+                            <p className="text-sm text-gray-700">
+                              <span className="font-medium">Current Marks:</span> {detailedResult.marksAwarded || 0}/{question.marks || 1}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Student's Reason */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Student's Reason for Review:</label>
+                    <div className="bg-orange-50 border border-orange-200 p-4 rounded-lg">
+                      <p className="text-gray-900">{selectedRequest.reason}</p>
+                    </div>
+                  </div>
+
+                  {/* New Marks Input */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Award New Marks (out of {question?.marks || 1}):
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max={question?.marks || 1}
+                      step="0.5"
+                      value={newMarks}
+                      onChange={(e) => setNewMarks(parseFloat(e.target.value) || 0)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter marks to award..."
+                    />
+                    <p className="mt-1 text-sm text-gray-500">
+                      Current marks: {detailedResult?.marksAwarded || 0}. Enter new marks if approving the request.
+                    </p>
+                  </div>
+                  
+                  {/* Review Notes */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Review Notes (Optional):</label>
+                    <textarea
+                      value={reviewNotes}
+                      onChange={(e) => setReviewNotes(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={3}
+                      placeholder="Add notes about your decision..."
+                    />
+                  </div>
+                </div>
+              );
+            })()}
             
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => {
                   setSelectedRequest(null);
                   setReviewNotes('');
+                  setNewMarks(0);
                 }}
                 className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
@@ -340,11 +454,11 @@ const ReviewRequests: React.FC<ReviewRequestsProps> = ({ currentUser, onBack }) 
                 {submitting ? 'Processing...' : 'Reject'}
               </button>
               <button
-                onClick={() => handleReviewRequest(selectedRequest.id, 'approved')}
+                onClick={() => handleReviewRequest(selectedRequest.id, 'approved', newMarks)}
                 disabled={submitting}
                 className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {submitting ? 'Processing...' : 'Approve'}
+                {submitting ? 'Processing...' : `Approve & Award ${newMarks} Marks`}
               </button>
             </div>
           </div>
