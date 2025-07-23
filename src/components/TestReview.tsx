@@ -198,32 +198,75 @@ const TestReview: React.FC<TestReviewProps> = ({ result, test, currentUser, onBa
                 </div>
               </div>
             );
-              {/* Real Number Questions */}
-              {question.type === 'real-number' && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Your Answer:
-                    </label>
-                    <div className={`p-3 rounded-lg border-2 ${
-                      isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
-                    }`}>
-                      <p className="text-gray-900">{userAnswer as string || 'No answer provided'}</p>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Correct Answer:
-                    </label>
-                    <div className="p-3 rounded-lg border-2 border-green-200 bg-green-50">
-                      <p className="text-gray-900">{question.correctNumber}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
           })}
+
+          {/* True/False Questions */}
+          {question.type === 'true-false' && (
+            <div className="space-y-2">
+              <div className={`p-3 rounded-lg border-2 ${
+                question.correctAnswer === 1 ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50'
+              }`}>
+                <div className="flex items-center">
+                  <div className={`w-4 h-4 rounded-full mr-3 ${
+                    question.correctAnswer === 1 ? 'bg-green-500' : 'bg-gray-300'
+                  }`} />
+                  <span className="text-gray-900">True</span>
+                  {question.correctAnswer === 1 && (
+                    <CheckCircle className="h-4 w-4 text-green-500 ml-auto" />
+                  )}
+                  {userAnswer === 1 && question.correctAnswer !== 1 && (
+                    <XCircle className="h-4 w-4 text-red-500 ml-auto" />
+                  )}
+                </div>
+              </div>
+              
+              <div className={`p-3 rounded-lg border-2 ${
+                question.correctAnswer === 0 ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50'
+              }`}>
+                <div className="flex items-center">
+                  <div className={`w-4 h-4 rounded-full mr-3 ${
+                    question.correctAnswer === 0 ? 'bg-green-500' : 'bg-gray-300'
+                  }`} />
+                  <span className="text-gray-900">False</span>
+                  {question.correctAnswer === 0 && (
+                    <CheckCircle className="h-4 w-4 text-green-500 ml-auto" />
+                  )}
+                  {userAnswer === 0 && question.correctAnswer !== 0 && (
+                    <XCircle className="h-4 w-4 text-red-500 ml-auto" />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Real Number Questions */}
+          {question.type === 'real-number' && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Your Answer:
+                </label>
+                <div className={`p-3 rounded-lg border-2 ${
+                  isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+                }`}>
+                  <p className="text-gray-900">{userAnswer as string || 'No answer provided'}</p>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Correct Answer:
+                </label>
+                <div className="p-3 rounded-lg border-2 border-green-200 bg-green-50">
+                  <p className="text-gray-900">{question.correctNumber}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  })}
         </div>
 
         {/* Performance Summary */}
@@ -240,7 +283,7 @@ const TestReview: React.FC<TestReviewProps> = ({ result, test, currentUser, onBa
               <div className="text-2xl font-bold text-red-600">{totalQuestions - correctAnswers}</div>
               <div className="text-sm text-gray-600">Incorrect Answers</div>
             </div>
-                    {isCorrect ? ' (Accepted as correct)' : ' (Marked as incorrect)'}
+            
             <div className="text-center p-4 bg-blue-50 rounded-lg">
               <div className={`text-2xl font-bold ${getScoreColor(result.score)}`}>{result.score}%</div>
               <div className="text-sm text-gray-600">Overall Score</div>
