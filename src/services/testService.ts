@@ -320,7 +320,7 @@ export class TestService {
       reviewNotes: request.review_notes
     }));
   };
-}
+};
 
  static async updateReviewRequest(requestId: string, updates: {
    status: 'approved' | 'rejected';
