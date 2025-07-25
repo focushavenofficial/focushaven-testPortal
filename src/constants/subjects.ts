@@ -7,6 +7,7 @@ export const subList = [
   { name: 'History', code: 'hist' },
   { name: 'Geography', code: 'geo' },
   { name: 'Mathematics', code: 'math' },
+  { name: 'Mixed/All Subjects', code: 'mixed' },
 ];
 
 export const getSubjectName = (code: string): string => {
