@@ -103,7 +103,7 @@ export class TestService {
       createdBy: test.created_by,
       createdAt: new Date(test.created_at),
       target_class: test.targetClass,
-      subject: test.subject
+      subject: test.subject,
       targetClass: test.target_class
     }));
   }
