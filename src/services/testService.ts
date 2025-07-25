@@ -102,7 +102,8 @@ export class TestService {
       questions: test.questions,
       createdBy: test.created_by,
       createdAt: new Date(test.created_at),
-      isActive: test.is_active,
+      target_class: test.targetClass,
+      subject: test.subject
       targetClass: test.target_class
     }));
   }
@@ -235,6 +236,7 @@ export class TestService {
     if (updates.questions) updateData.questions = updates.questions;
     if (updates.isActive !== undefined) updateData.is_active = updates.isActive;
     if (updates.targetClass !== undefined) updateData.target_class = updates.targetClass;
+    if (updates.subject !== undefined) updateData.subject = updates.subject;
 
     const { data, error } = await supabase
       .from('tests')

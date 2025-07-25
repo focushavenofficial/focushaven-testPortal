@@ -3,19 +3,19 @@ import { Test, Question } from '../types';
 import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react';
 import { subList } from '../constants/subjects';
 
-interface CreateTestProps {
-  onCreateTest: (test: Omit<Test, 'id' | 'createdAt'>) => void;
+interface EditTestProps {
+  test: Test;
+  onUpdateTest: (testId: string, updates: Partial<Test>) => void;
   onBack: () => void;
-  createdBy: string;
 }
 
-const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy }) => {
-  const [testTitle, setTestTitle] = useState('');
-  const [testDescription, setTestDescription] = useState('');
-  const [testDuration, setTestDuration] = useState(30);
-  const [targetClass, setTargetClass] = useState<number | undefined>(undefined);
-  const [subject, setSubject] = useState<string>('');
-  const [questions, setQuestions] = useState<Question[]>([]);
+const EditTest: React.FC<EditTestProps> = ({ test, onUpdateTest, onBack }) => {
+  const [testTitle, setTestTitle] = useState(test.title);
+  const [testDescription, setTestDescription] = useState(test.description);
+  const [testDuration, setTestDuration] = useState(test.duration);
+  const [targetClass, setTargetClass] = useState<number | undefined>(test.targetClass);
+  const [subject, setSubject] = useState<string>(test.subject || '');
+  const [questions, setQuestions] = useState<Question[]>(test.questions);
   const [currentQuestion, setCurrentQuestion] = useState<Partial<Question>>({
     question: '',
     options: ['', '', '', ''],
@@ -72,17 +72,16 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (testTitle && testDescription && questions.length > 0) {
-      onCreateTest({
+    if (testTitle && testDescription && subject && questions.length > 0) {
+      onUpdateTest(test.id, {
         title: testTitle,
         description: testDescription,
         duration: testDuration,
         questions,
-        createdBy,
-        isActive: true,
         targetClass: targetClass,
         subject: subject
       });
+      onBack();
     }
   };
 
@@ -99,7 +98,7 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
-              <h1 className="text-xl font-bold text-gray-900">Create New Test</h1>
+              <h1 className="text-xl font-bold text-gray-900">Edit Test</h1>
             </div>
           </div>
         </div>
@@ -208,7 +207,7 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
 
           {/* Add Question */}
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Add Question</h2>
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Add New Question</h2>
             
             <div className="space-y-4">
               <div>
@@ -264,43 +263,37 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                   onChange={(e) => setCurrentQuestion({ ...currentQuestion, marks: parseInt(e.target.value) || 1 })}
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
-                <p className="mt-1 text-sm text-gray-500">
-                  {currentQuestion.type === 'short-answer' 
-                    ? 'For short answers, partial marks will be awarded based on AI similarity score'
-                    : 'Full marks awarded for correct answers only'
-                  }
-                </p>
               </div>
               
               {currentQuestion.type === 'multiple-choice' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Answer Options
-                </label>
-                <div className="space-y-2">
-                  {currentQuestion.options?.map((option, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        name="correct-answer"
-                        checked={currentQuestion.correctAnswer === index}
-                        onChange={() => setCurrentQuestion({ ...currentQuestion, correctAnswer: index })}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <input
-                        type="text"
-                        value={option}
-                        onChange={(e) => handleOptionChange(index, e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder={`Option ${index + 1}`}
-                      />
-                      <span className="text-sm text-gray-500">
-                        {currentQuestion.correctAnswer === index ? 'Correct' : ''}
-                      </span>
-                    </div>
-                  ))}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Answer Options
+                  </label>
+                  <div className="space-y-2">
+                    {currentQuestion.options?.map((option, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          name="correct-answer"
+                          checked={currentQuestion.correctAnswer === index}
+                          onChange={() => setCurrentQuestion({ ...currentQuestion, correctAnswer: index })}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <input
+                          type="text"
+                          value={option}
+                          onChange={(e) => handleOptionChange(index, e.target.value)}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder={`Option ${index + 1}`}
+                        />
+                        <span className="text-sm text-gray-500">
+                          {currentQuestion.correctAnswer === index ? 'Correct' : ''}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
               )}
 
               {currentQuestion.type === 'true-false' && (
@@ -346,9 +339,6 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                     className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder={currentQuestion.type === 'fill-in-blank' ? 'Enter the word/phrase that fills the blank' : 'Enter the expected answer'}
                   />
-                  <p className="mt-1 text-sm text-gray-500">
-                    AI will check similarity between student answers and this expected answer
-                  </p>
                 </div>
               )}
 
@@ -366,9 +356,6 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                     className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter the correct number (up to 3 decimal places)"
                   />
-                  <p className="mt-1 text-sm text-gray-500">
-                    Numbers will be compared up to 3 decimal places for accuracy
-                  </p>
                 </div>
               )}
               
@@ -399,75 +386,29 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
                           {index + 1}. {question.question}
                         </h3>
                         {question.type === 'multiple-choice' && (
-                        <div className="space-y-1">
-                          {question.options.map((option, optIndex) => (
-                            <div key={optIndex} className="flex items-center text-sm">
-                              <span className={`inline-block w-4 h-4 rounded-full mr-2 ${
-                                optIndex === question.correctAnswer ? 'bg-green-500' : 'bg-gray-300'
-                              }`}></span>
-                              <span className={optIndex === question.correctAnswer ? 'font-medium text-green-700' : 'text-gray-600'}>
-                                {option}
-                              </span>
-                            </div>
-                          ))}
+                          <div className="space-y-1">
+                            {question.options.map((option, optIndex) => (
+                              <div key={optIndex} className="flex items-center text-sm">
+                                <span className={`inline-block w-4 h-4 rounded-full mr-2 ${
+                                  optIndex === question.correctAnswer ? 'bg-green-500' : 'bg-gray-300'
+                                }`}></span>
+                                <span className={optIndex === question.correctAnswer ? 'font-medium text-green-700' : 'text-gray-600'}>
+                                  {option}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div className="mt-2 text-sm text-gray-600">
+                          <span className="font-medium">Type:</span> {
+                            question.type === 'short-answer' ? 'Short Answer' : 
+                            question.type === 'fill-in-blank' ? 'Fill in the Blank' :
+                            question.type === 'true-false' ? 'True/False' :
+                            question.type === 'real-number' ? 'Real Number' :
+                            'Multiple Choice'
+                          }
+                          <span className="ml-4 font-medium">Marks:</span> {question.marks || 1}
                         </div>
-                        )}
-                        {(question.type === 'short-answer' || question.type === 'fill-in-blank') && (
-                          <div className="mt-2">
-                            <div className="text-sm text-gray-600">
-                              <span className="font-medium">Type:</span> {
-                                question.type === 'short-answer' ? 'Short Answer' : 
-                                question.type === 'fill-in-blank' ? 'Fill in the Blank' :
-                                question.type === 'true-false' ? 'True/False' :
-                                question.type === 'real-number' ? 'Real Number' :
-                                'Multiple Choice'
-                              }
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              <span className="font-medium">Expected Answer:</span> {question.expectedAnswer}
-                            </div>
-                          </div>
-                        )}
-                        {question.type === 'real-number' && (
-                          <div className="mt-2">
-                            <div className="text-sm text-gray-600">
-                              <span className="font-medium">Type:</span> Real Number
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              <span className="font-medium">Correct Answer:</span> {question.correctNumber}
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              <span className="font-medium">Marks:</span> {question.marks || 1}
-                            </div>
-                          </div>
-                        )}
-                        {question.type === 'true-false' && (
-                          <div className="mt-2">
-                            <div className="text-sm text-gray-600">
-                              <span className="font-medium">Type:</span> True/False
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              <span className="font-medium">Correct Answer:</span> {question.correctAnswer === 1 ? 'True' : 'False'}
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              <span className="font-medium">Marks:</span> {question.marks || 1}
-                            </div>
-                          </div>
-                        )}
-                        {(question.type === 'short-answer' || question.type === 'fill-in-blank') && (
-                          <div className="mt-2">
-                            <div className="text-sm text-gray-600">
-                              <span className="font-medium">Marks:</span> {question.marks || 1}
-                            </div>
-                          </div>
-                        )}
-                        {question.type === 'multiple-choice' && (
-                          <div className="mt-2">
-                            <div className="text-sm text-gray-600">
-                              <span className="font-medium">Marks:</span> {question.marks || 1}
-                            </div>
-                          </div>
-                        )}
                       </div>
                       <button
                         type="button"
@@ -484,14 +425,21 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
           )}
 
           {/* Submit */}
-          <div className="flex justify-end">
+          <div className="flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={onBack}
+              className="px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            >
+              Cancel
+            </button>
             <button
               type="submit"
               disabled={!testTitle || !testDescription || !subject || questions.length === 0}
               className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Save className="h-5 w-5 mr-2" />
-              Create Test
+              Update Test
             </button>
           </div>
         </form>
@@ -500,4 +448,4 @@ const CreateTest: React.FC<CreateTestProps> = ({ onCreateTest, onBack, createdBy
   );
 };
 
-export default CreateTest;
+export default EditTest;

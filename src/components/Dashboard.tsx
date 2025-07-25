@@ -1,6 +1,7 @@
 import React from 'react';
 import { User, Test } from '../types';
 import { BookOpen, Plus, BarChart3, LogOut, Clock, Users, FileText, MoreVertical, Edit, Trash2, EyeOff, Eye, MessageSquare } from 'lucide-react';
+import { getSubjectName, subList } from '../constants/subjects';
 
 interface DashboardProps {
   user: User;
@@ -12,6 +13,7 @@ interface DashboardProps {
   onViewReviewRequests?: () => void;
   onUpdateTest?: (testId: string, updates: Partial<Test>) => void;
   onDeleteTest?: (testId: string) => void;
+  onEditTest?: (test: Test) => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
@@ -23,10 +25,12 @@ const Dashboard: React.FC<DashboardProps> = ({
   onViewResults,
   onViewReviewRequests,
   onUpdateTest,
-  onDeleteTest
+  onDeleteTest,
+  onEditTest
 }) => {
   const [showDropdown, setShowDropdown] = React.useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState<string | null>(null);
+  const [subjectFilter, setSubjectFilter] = React.useState<string>('all');
 
   const userTests = tests.filter(test => 
     user.role === 'student' ? test.isActive : 
@@ -34,6 +38,9 @@ const Dashboard: React.FC<DashboardProps> = ({
     true
   );
 
+  const filteredTests = subjectFilter === 'all' 
+    ? userTests 
+    : userTests.filter(test => test.subject === subjectFilter);
   const handleToggleActive = async (testId: string, currentStatus: boolean) => {
     if (onUpdateTest) {
       await onUpdateTest(testId, { isActive: !currentStatus });
@@ -107,7 +114,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                 <FileText className="h-8 w-8 text-amber-900" />
               </div>
               <div className="ml-4">
-                <div className="text-2xl font-bold text-gray-900">{userTests.length}</div>
+                <div className="text-2xl font-bold text-gray-900">{filteredTests.length}</div>
                 <div className="text-sm text-gray-600">
                   {user.role === 'student' ? 'Available Tests' : 'Total Tests'}
                 </div>
@@ -122,7 +129,7 @@ const Dashboard: React.FC<DashboardProps> = ({
               </div>
               <div className="ml-4">
                 <div className="text-2xl font-bold text-gray-900">
-                  {userTests.filter(t => t.isActive).length}
+                  {filteredTests.filter(t => t.isActive).length}
                 </div>
                 <div className="text-sm text-gray-600">Active Tests</div>
               </div>
@@ -175,6 +182,23 @@ const Dashboard: React.FC<DashboardProps> = ({
           )}
         </div>
 
+        {/* Subject Filter */}
+        <div className="mb-6">
+          <label htmlFor="subject-filter" className="block text-sm font-medium text-gray-700 mb-2">
+            Filter by Subject
+          </label>
+          <select
+            id="subject-filter"
+            value={subjectFilter}
+            onChange={(e) => setSubjectFilter(e.target.value)}
+            className="block w-full md:w-auto px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+          >
+            <option value="all">All Subjects</option>
+            {subList.map(subject => (
+              <option key={subject.code} value={subject.code}>{subject.name}</option>
+            ))}
+          </select>
+        </div>
         {/* Tests Grid */}
         <div className="bg-white rounded-lg shadow-sm">
           <div className="px-6 py-4 border-b border-gray-200">
@@ -183,14 +207,16 @@ const Dashboard: React.FC<DashboardProps> = ({
             </h3>
           </div>
           
-          {userTests.length === 0 ? (
+          {filteredTests.length === 0 ? (
             <div className="px-6 py-12 text-center">
               <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">No tests available at the moment.</p>
+              <p className="text-gray-600">
+                {subjectFilter === 'all' ? 'No tests available at the moment.' : `No tests available for ${getSubjectName(subjectFilter)}.`}
+              </p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {userTests.map((test) => (
+              {filteredTests.map((test) => (
                 <div key={test.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
@@ -201,6 +227,11 @@ const Dashboard: React.FC<DashboardProps> = ({
                         }`}>
                           {test.isActive ? 'Active' : 'Inactive'}
                         </div>
+                        {test.subject && (
+                          <div className="ml-2 px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
+                            {getSubjectName(test.subject)}
+                          </div>
+                        )}
                       </div>
                       <p className="text-gray-600 mt-1">{test.description}</p>
                       <div className="flex items-center text-sm text-gray-500 mt-2">
@@ -247,6 +278,19 @@ const Dashboard: React.FC<DashboardProps> = ({
                           {showDropdown === test.id && (
                             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
                               <div className="py-1">
+                                {onEditTest && (
+                                  <button
+                                    onClick={() => {
+                                      onEditTest(test);
+                                      setShowDropdown(null);
+                                    }}
+                                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                  >
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Edit Test
+                                  </button>
+                                )}
+                                
                                 <button
                                   onClick={() => handleToggleActive(test.id, test.isActive)}
                                   className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"

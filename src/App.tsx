@@ -6,13 +6,14 @@ import CreateTest from './components/CreateTest';
 import Results from './components/Results';
 import TestReview from './components/TestReview';
 import ReviewRequests from './components/ReviewRequests';
+import EditTest from './components/EditTest';
 import { User, Test, TestResult } from './types';
 import { TestService } from './services/testService';
 import { AstraAuthService } from './services/astraAuthService';
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'test' | 'create' | 'results' | 'review' | 'review-requests'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'test' | 'create' | 'edit' | 'results' | 'review' | 'review-requests'>('dashboard');
   const [selectedTest, setSelectedTest] = useState<Test | null>(null);
   const [selectedResult, setSelectedResult] = useState<TestResult | null>(null);
   const [tests, setTests] = useState<Test[]>([]);
@@ -101,6 +102,10 @@ function App() {
     }
   };
 
+  const handleEditTest = (test: Test) => {
+    setSelectedTest(test);
+    setCurrentView('edit');
+  };
   const handleStartTest = (test: Test) => {
     setSelectedTest(test);
     setCurrentView('test');
@@ -217,6 +222,7 @@ function App() {
           onUpdateTest={handleUpdateTest}
           onDeleteTest={handleDeleteTest}
           onViewReviewRequests={() => setCurrentView('review-requests')}
+          onEditTest={handleEditTest}
         />
       )}
       
@@ -233,6 +239,14 @@ function App() {
           onCreateTest={handleCreateTest}
           onBack={() => setCurrentView('dashboard')}
           createdBy={currentUser.id}
+        />
+      )}
+      
+      {currentView === 'edit' && selectedTest && (
+        <EditTest
+          test={selectedTest}
+          onUpdateTest={handleUpdateTest}
+          onBack={() => setCurrentView('dashboard')}
         />
       )}
       

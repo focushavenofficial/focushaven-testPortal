@@ -27,6 +27,7 @@ export interface Test {
   createdAt: Date;
   isActive: boolean;
   targetClass?: number; // null/undefined means available to all classes
+  subject?: string; // Subject code from subList
 }
 
 export interface TestResult {
