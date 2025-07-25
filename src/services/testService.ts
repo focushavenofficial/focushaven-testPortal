@@ -29,7 +29,8 @@ export class TestService {
       createdBy: data.created_by,
       createdAt: new Date(data.created_at),
       isActive: data.is_active,
-      targetClass: data.target_class
+      targetClass: data.target_class,
+      subject: data.subject
     };
   }
 
@@ -102,9 +103,9 @@ export class TestService {
       questions: test.questions,
       createdBy: test.created_by,
       createdAt: new Date(test.created_at),
-      target_class: test.targetClass,
-      subject: test.subject,
-      targetClass: test.target_class
+      isActive: test.is_active,
+      targetClass: test.target_class,
+      subject: test.subject
     }));
   }
 
@@ -256,7 +257,8 @@ export class TestService {
       createdBy: data.created_by,
       createdAt: new Date(data.created_at),
       isActive: data.is_active,
-      targetClass: data.target_class
+      targetClass: data.target_class,
+      subject: data.subject
     };
   }
 
