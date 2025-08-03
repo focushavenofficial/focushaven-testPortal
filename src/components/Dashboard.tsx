@@ -1,6 +1,6 @@
 import React from 'react';
 import { User, Test } from '../types';
-import { BookOpen, Plus, BarChart3, LogOut, Clock, Users, FileText, MoreVertical, Edit, Trash2, EyeOff, Eye, MessageSquare } from 'lucide-react';
+import { BookOpen, Plus, BarChart3, LogOut, Clock, Users, FileText, MoreVertical, Edit, Trash2, EyeOff, Eye, MessageSquare, RefreshCw, Calendar } from 'lucide-react';
 import { getSubjectName, subList } from '../constants/subjects';
 
 interface DashboardProps {
@@ -31,7 +31,16 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [showDropdown, setShowDropdown] = React.useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState<string | null>(null);
   const [subjectFilter, setSubjectFilter] = React.useState<string>('all');
+  const [currentDateTime, setCurrentDateTime] = React.useState(new Date());
 
+  // Update date/time every second
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
   const userTests = tests.filter(test => 
     user.role === 'student' ? test.isActive : 
     user.role === 'teacher' ? test.createdBy === user.id : 
@@ -42,6 +51,29 @@ const Dashboard: React.FC<DashboardProps> = ({
     ? userTests 
     : userTests.filter(test => test.subject === subjectFilter);
   const handleToggleActive = async (testId: string, currentStatus: boolean) => {
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
+  const formatDate = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
+    return date.toLocaleDateString('en-US', options);
+  };
+
+  const formatTime = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = {
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    };
+    return date.toLocaleTimeString('en-US', options);
+  };
     if (onUpdateTest) {
       await onUpdateTest(testId, { isActive: !currentStatus });
       setShowDropdown(null);
@@ -73,7 +105,36 @@ const Dashboard: React.FC<DashboardProps> = ({
               <BookOpen className="h-8 w-8 text-amber-900" />
               <h1 className="ml-2 text-xl font-bold text-gray-900">Test Portal</h1>
             </div>
+            
+            {/* Date/Time Display */}
+            <div className="hidden md:flex items-center space-x-4 text-sm">
+              <div className="flex items-center text-gray-600">
+                <Calendar className="h-4 w-4 mr-2" />
+                <div className="text-center">
+                  <div className="font-medium">{formatDate(currentDateTime)}</div>
+                  <div className="text-xs text-gray-500">{formatTime(currentDateTime)}</div>
+                </div>
+              </div>
+            </div>
+            
             <div className="flex items-center space-x-4">
+              {/* Mobile Date/Time */}
+              <div className="md:hidden flex items-center text-xs text-gray-600">
+                <Calendar className="h-3 w-3 mr-1" />
+                <div>
+                  <div>{currentDateTime.toLocaleDateString()}</div>
+                  <div>{formatTime(currentDateTime)}</div>
+                </div>
+              </div>
+              
+              <button
+                onClick={handleRefresh}
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
+                title="Refresh Page"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </button>
+              
               <div className="text-sm text-gray-600">
                 Welcome, <span className="font-medium text-gray-900">{user.name}</span>
               </div>
