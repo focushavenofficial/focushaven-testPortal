@@ -33,6 +33,33 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [subjectFilter, setSubjectFilter] = React.useState<string>('all');
   const [currentDateTime, setCurrentDateTime] = React.useState(new Date());
 
+  const formatDate = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
+    return date.toLocaleDateString('en-US', options);
+  };
+
+  const formatTime = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = {
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    };
+    return date.toLocaleTimeString('en-US', options);
+  };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
+
   // Update date/time every second
   React.useEffect(() => {
     const timer = setInterval(() => {
@@ -68,33 +95,6 @@ const Dashboard: React.FC<DashboardProps> = ({
   const formatTime = (date: Date) => {
     const options: Intl.DateTimeFormatOptions = {
       hour: 'numeric',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true
-    };
-    return date.toLocaleTimeString('en-US', options);
-  };
-    if (onUpdateTest) {
-      await onUpdateTest(testId, { isActive: !currentStatus });
-      setShowDropdown(null);
-    }
-  };
-
-  const handleDeleteTest = async (testId: string) => {
-    if (onDeleteTest) {
-      await onDeleteTest(testId);
-      setShowDeleteConfirm(null);
-      setShowDropdown(null);
-    }
-  };
-
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
-  };
-
   return (
     <div className="min-h-screen bg-lime-50">
       {/* Header */}
