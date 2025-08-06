@@ -1,6 +1,10 @@
 [functions]
 directory = "netlify/functions"
 
+[[functions]]
+  name = "pingApi"
+  schedule = "*/10 * * * *"  # Every 15 minutes
+
 [build]
 command = "npx vite build"
 publish = "dist"
