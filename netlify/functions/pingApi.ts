@@ -4,7 +4,7 @@ import { Handler } from '@netlify/functions';
 
 const handler: Handler = async () => {
   try {
-    const response = await fetch("https://your-api-endpoint.com/data", {
+    const response = await fetch("https://focushaven-api.vercel.app/api/v1/uptime-keeper", {
       method: "GET", // or POST/PUT/DELETE etc.
       headers: {
         "Content-Type": "application/json",
