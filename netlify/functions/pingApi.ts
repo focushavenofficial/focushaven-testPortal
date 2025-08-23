@@ -6,7 +6,7 @@ const handler: Handler = async () => {
   try {
     // Ping Supabase first
     console.log("Pinging Supabase...");
-    const supabaseResponse = await fetch("https://rcfjprtdllvqymhkuewq.supabase.co/rest/v1/", {
+    const supabaseResponse = await fetch("https://ipbkceewkwlcivqrjufi.supabase.co/rest/v1/", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
