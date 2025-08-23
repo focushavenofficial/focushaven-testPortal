@@ -10,7 +10,7 @@ const handler: Handler = async () => {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "apikey": import.meta.env.VITE_SUPABASE_ANON_KEY, // Using anon key for health check
+        "apikey": process.env.VITE_SUPABASE_ANON_KEY || "fallback-key", // Using anon key for health check
       },
     });
 
@@ -47,7 +47,7 @@ const handler: Handler = async () => {
     console.error("API ping failed:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ message: "API ping failed", error: error.message }),
+      body: JSON.stringify({ message: "API ping failed", error: error instanceof Error ? error.message : String(error) }),
     };
   }
 };
