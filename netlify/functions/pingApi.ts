@@ -10,7 +10,7 @@ const handler: Handler = async () => {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjZmpwcnRkbGx2cXltaGt1ZXdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY5NTU5NzQsImV4cCI6MjA1MjUzMTk3NH0.Ej7Ej7Ej7Ej7Ej7Ej7Ej7Ej7Ej7Ej7Ej7Ej7Ej7E", // Using anon key for health check
+        "apikey": import.meta.env.VITE_SUPABASE_ANON_KEY, // Using anon key for health check
       },
     });
 
