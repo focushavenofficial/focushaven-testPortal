@@ -4,6 +4,21 @@ import { Handler } from '@netlify/functions';
 
 const handler: Handler = async () => {
   try {
+    // Ping Supabase first
+    console.log("Pinging Supabase...");
+    const supabaseResponse = await fetch("https://rcfjprtdllvqymhkuewq.supabase.co/rest/v1/", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjZmpwcnRkbGx2cXltaGt1ZXdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY5NTU5NzQsImV4cCI6MjA1MjUzMTk3NH0.Ej7Ej7Ej7Ej7Ej7Ej7Ej7Ej7Ej7Ej7Ej7Ej7Ej7E", // Using anon key for health check
+      },
+    });
+
+    const supabaseData = await supabaseResponse.text();
+    console.log("Supabase Response:", supabaseData);
+
+    // Ping the existing API
+    console.log("Pinging Focus Haven API...");
     const response = await fetch("https://focushaven-api.vercel.app/api/v1/uptime-keeper", {
       method: "GET", // or POST/PUT/DELETE etc.
       headers: {
@@ -14,18 +29,25 @@ const handler: Handler = async () => {
 
     const data = await response.json();
 
-    // Log or process the data
-    console.log("API Response:", data);
+    // Log or process both responses
+    console.log("Focus Haven API Response:", data);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: "API call successful", data }),
+      body: JSON.stringify({ 
+        message: "Both APIs pinged successfully", 
+        supabase: {
+          status: supabaseResponse.status,
+          statusText: supabaseResponse.statusText
+        },
+        focusHavenApi: data 
+      }),
     };
   } catch (error) {
-    console.error("API call failed:", error);
+    console.error("API ping failed:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ message: "API call failed", error }),
+      body: JSON.stringify({ message: "API ping failed", error: error.message }),
     };
   }
 };
