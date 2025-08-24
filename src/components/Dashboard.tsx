@@ -33,7 +33,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState<string | null>(null);
   const [subjectFilter, setSubjectFilter] = React.useState<string>('all');
   const [currentDateTime, setCurrentDateTime] = React.useState(new Date());
-  const [reviewRequestCount, setReviewRequestCount] = React.useState(0);
+  const [pendingCount, setPendingCount] = React.useState(0);
 
   // Update date/time every second
   React.useEffect(() => {
@@ -49,16 +49,30 @@ const Dashboard: React.FC<DashboardProps> = ({
     window.location.reload();
   };
 
-  useEffect(() => {
-    const fetchPendingRequests = async () => {
-      const reviewRequests = await TestService.getReviewRequests(user.role, user.id);
-      // Only count requests with status 'pending'
-      const pendingCount = reviewRequests.filter(r => r.status === 'pending').length;
-      setPendingRequestCount(pendingCount);
+  React.useEffect(() => {
+    const run = async () => {
+      const [requests, myTests, allResults] = await Promise.all([
+        TestService.getReviewRequests(user.role, user.id),
+        TestService.getTests('teacher', user.id),        // only your tests
+        TestService.getTestResults('teacher'),           // all results (service currently returns all)
+      ]);
+
+      const myTestIds = new Set(myTests.map(t => t.id));
+      const resultIdToTestId = new Map(allResults.map(r => [r.id, r.testId]));
+
+      const pendingForMe = requests.filter(r => {
+        if (r.status !== 'pending') return false;
+        const testId = resultIdToTestId.get(r.testResultId);
+        return myTestIds.has(testId);
+      });
+
+      setPendingCount(pendingForMe.length);
     };
-  
-    fetchPendingRequests();
-  }, [user.role, user.id]);
+    run();
+  }, [user.id, user.role]);
+
+  fetchPendingRequests();
+}, [user.role, user.id]);
 
   const formatDate = (date: Date) => {
     const options: Intl.DateTimeFormatOptions = {
@@ -256,9 +270,9 @@ const Dashboard: React.FC<DashboardProps> = ({
             >
               <MessageSquare className="h-4 w-4 mr-2" />
               Review Requests
-              {reviewRequestCount >= 1 && (
+              {pendingCount >= 1 && (
                 <span className="inline-block w-4 h-4 bg-red-600 rounded-full ml-2 text-white text-xs font-medium flex items-center justify-center">
-                  {reviewRequestCount}
+                  {pendingCount}
                 </span>
               )}
             </button>
