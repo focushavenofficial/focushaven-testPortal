@@ -2,6 +2,7 @@ import React from 'react';
 import { User, Test } from '../types';
 import { BookOpen, Plus, BarChart3, LogOut, Clock, Users, FileText, MoreVertical, Edit, Trash2, EyeOff, Eye, MessageSquare, RefreshCw, Calendar } from 'lucide-react';
 import { getSubjectName, subList } from '../constants/subjects';
+import { TestService } from '../services/testService';
 
 interface DashboardProps {
   user: User;
@@ -46,6 +47,11 @@ const Dashboard: React.FC<DashboardProps> = ({
   const handleRefresh = () => {
     window.location.reload();
   };
+
+  const ReviewRequestNotf = () => {
+    const reviewRequests = await TestService.getReviewRequests(user.role, user.id),
+    return reviewRequests.length
+  }
 
   const formatDate = (date: Date) => {
     const options: Intl.DateTimeFormatOptions = {
@@ -243,7 +249,11 @@ const Dashboard: React.FC<DashboardProps> = ({
             >
               <MessageSquare className="h-4 w-4 mr-2" />
               Review Requests
-              <span class="inline-block w-4 h-4 bg-red-600 rounded-full ml-2 text-white">1</span>
+              {requests.length >= 1 && (
+                <span className="inline-block w-4 h-4 bg-red-600 rounded-full ml-2 text-white text-xs font-medium flex items-center justify-center">
+                  {requests.length}
+                </span>
+              )}
             </button>
           )}
         </div>
