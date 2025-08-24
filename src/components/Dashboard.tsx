@@ -243,7 +243,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             >
               <MessageSquare className="h-4 w-4 mr-2" />
               Review Requests
-              <span class="inline-block w-2 h-2 bg-black rounded-full"></span>
+              <span class="inline-block w-2 h-2 bg-red-600 rounded-full ml-3"></span>
             </button>
           )}
         </div>
