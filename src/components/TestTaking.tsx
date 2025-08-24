@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Test, Question, User } from '../types';
-import { Clock, ArrowLeft, ArrowRight, CheckCircle, AlertCircle, User, BookOpen, Eye, Save, Send } from 'lucide-react';
+import { Clock, ArrowLeft, ArrowRight, CheckCircle, AlertCircle, BookOpen, Eye, Save, Send } from 'lucide-react';
 import { getSubjectName } from '../constants/subjects';
 import * as jdenticon from 'jdenticon';
 
