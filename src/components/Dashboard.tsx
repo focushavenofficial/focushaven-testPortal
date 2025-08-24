@@ -49,7 +49,7 @@ const Dashboard: React.FC<DashboardProps> = ({
     window.location.reload();
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchRequests = async () => {
       const reviewRequests = await TestService.getReviewRequests(user.role, user.id);
       setReviewRequestCount(reviewRequests.length);
