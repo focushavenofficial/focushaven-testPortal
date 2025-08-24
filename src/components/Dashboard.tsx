@@ -242,10 +242,8 @@ const Dashboard: React.FC<DashboardProps> = ({
               className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
             >
               <MessageSquare className="h-4 w-4 mr-2" />
-              <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white text-xs font-bold">
-        2
-              </span>
               Review Requests
+              <span class="inline-block w-2 h-2 bg-black rounded-full"></span>
             </button>
           )}
         </div>
