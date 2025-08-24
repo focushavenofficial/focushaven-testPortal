@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Test, Question, User } from '../types';
 import { Clock, ArrowLeft, ArrowRight, CheckCircle, AlertCircle, BookOpen, Eye, Save, Send } from 'lucide-react';
 import { getSubjectName } from '../constants/subjects';
-import * as jdenticon from 'jdenticon';
+import jdenticon from 'jdenticon';
 
 interface TestTakingProps {
   test: Test;
@@ -217,8 +217,8 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, onBack }) => {
               </div>
               
               <div className="flex items-center text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                <img src={generateIdenticon(currentUser)} className="h-4 w-4 mr-2" />
-                <span className="font-medium">Student Name</span>
+                <img src={generateIdenticon(currentUser.id)} className="h-4 w-4 mr-2" />
+                <span className="font-medium">{currentUser.name}</span>
               </div>
             </div>
           </div>
