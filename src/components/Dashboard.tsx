@@ -48,7 +48,7 @@ const Dashboard: React.FC<DashboardProps> = ({
     window.location.reload();
   };
 
-  const ReviewRequestNotf = () => {
+  const ReviewRequestNotf = async () => {
     const reviewRequests = await TestService.getReviewRequests(user.role, user.id),
     return reviewRequests.length
   }
