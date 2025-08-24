@@ -217,7 +217,7 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, currentUser, on
               </div>
               
               <div className="flex items-center text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                <img src={generateIdenticon(currentUser.id)} className="h-4 w-4 mr-2" />
+                <img src={generateIdenticon(currentUser.id)} className="size-10 mr-2" />
                 <span className="font-medium">{currentUser.name}</span>
               </div>
             </div>
