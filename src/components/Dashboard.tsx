@@ -33,6 +33,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState<string | null>(null);
   const [subjectFilter, setSubjectFilter] = React.useState<string>('all');
   const [currentDateTime, setCurrentDateTime] = React.useState(new Date());
+  const [reviewRequestCount, setReviewRequestCount] = useState(0);
 
   // Update date/time every second
   React.useEffect(() => {
@@ -48,10 +49,13 @@ const Dashboard: React.FC<DashboardProps> = ({
     window.location.reload();
   };
 
-  const ReviewRequestNotf = async () => {
-    const reviewRequests = await TestService.getReviewRequests(user.role, user.id),
-    return reviewRequests.length
-  }
+  useEffect(() => {
+    const fetchRequests = async () => {
+      const reviewRequests = await TestService.getReviewRequests(user.role, user.id);
+      setReviewRequestCount(reviewRequests.length);
+    }
+    fetchRequests();
+  }, [user.role, user.id]);
 
   const formatDate = (date: Date) => {
     const options: Intl.DateTimeFormatOptions = {
@@ -249,9 +253,9 @@ const Dashboard: React.FC<DashboardProps> = ({
             >
               <MessageSquare className="h-4 w-4 mr-2" />
               Review Requests
-              {requests.length >= 1 && (
+              {reviewRequestCount >= 1 && (
                 <span className="inline-block w-4 h-4 bg-red-600 rounded-full ml-2 text-white text-xs font-medium flex items-center justify-center">
-                  {requests.length}
+                  {reviewRequestCount}
                 </span>
               )}
             </button>
