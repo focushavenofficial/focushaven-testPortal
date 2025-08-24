@@ -425,7 +425,7 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, currentUser, on
           </div>
 
           {/* Question Navigation Panel - Right Side */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 border-2 rounded-xl border-blue-800">
             <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Question Navigation</h3>
               
