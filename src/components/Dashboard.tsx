@@ -49,12 +49,15 @@ const Dashboard: React.FC<DashboardProps> = ({
     window.location.reload();
   };
 
-  React.useEffect(() => {
-    const fetchRequests = async () => {
+  useEffect(() => {
+    const fetchPendingRequests = async () => {
       const reviewRequests = await TestService.getReviewRequests(user.role, user.id);
-      setReviewRequestCount(reviewRequests.length);
-    }
-    fetchRequests();
+      // Only count requests with status 'pending'
+      const pendingCount = reviewRequests.filter(r => r.status === 'pending').length;
+      setPendingRequestCount(pendingCount);
+    };
+  
+    fetchPendingRequests();
   }, [user.role, user.id]);
 
   const formatDate = (date: Date) => {
