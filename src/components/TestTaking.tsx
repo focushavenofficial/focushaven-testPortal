@@ -279,7 +279,7 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, currentUser, on
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${((currentQuestion + 1) / filteredQuestions.length) * 100}%` }}
+                    style={{ width: `${((getAnsweredCount() + 1) / filteredQuestions.length) * 100}%` }}
                   />
                 </div>
               </div>
