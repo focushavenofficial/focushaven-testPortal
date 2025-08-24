@@ -111,7 +111,7 @@ function App() {
     setCurrentView('test');
   };
 
-  const handleSubmitTest = async (testId: string, answers: Record<string, number | string>, score: number) => {
+  const handleSubmitTest = async (testId: string, answers: Record<string, number | string>, score: number, reviewedQuestions?: string[]) => {
     if (!currentUser) return;
     
     setLoading(true);
@@ -125,7 +125,8 @@ function App() {
         testId,
         userId: currentUser.id,
         answers,
-        score
+        score,
+        reviewedQuestions: reviewedQuestions || []
       }, test);
       
       setResults(prev => [result, ...prev]);

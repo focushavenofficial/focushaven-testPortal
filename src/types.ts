@@ -15,6 +15,7 @@ export interface Question {
   expectedAnswer?: string; // For short-answer and fill-in-blank questions
   correctNumber?: number; // For real-number questions
   marks?: number; // Marks for the question (default 1)
+  subject?: string; // Subject code for the question
 }
 
 export interface Test {
@@ -37,6 +38,7 @@ export interface TestResult {
   answers: Record<string, number | string>; // Support both numeric and text answers
   score: number;
   completedAt: Date;
+  reviewedQuestions?: string[]; // Array of question IDs that were reviewed
   detailedResults?: {
     questionId: string;
     userAnswer: number | string;
@@ -58,4 +60,10 @@ export interface ReviewRequest {
   reviewedBy?: string;
   reviewedAt?: Date;
   reviewNotes?: string;
+}
+
+export interface QuestionState {
+  answered: boolean;
+  reviewed: boolean;
+  selected: boolean;
 }

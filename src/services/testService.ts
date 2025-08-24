@@ -175,7 +175,8 @@ export class TestService {
         test_id: result.testId,
         user_id: result.userId,
         answers: result.answers,
-        score: calculatedScore
+        score: calculatedScore,
+        reviewed_questions: result.reviewedQuestions || []
       })
       .select()
       .single();
@@ -200,6 +201,7 @@ export class TestService {
       answers: data.answers,
       score: data.score,
       completedAt: new Date(data.completed_at),
+      reviewedQuestions: data.reviewed_questions || [],
       detailedResults: detailedResults
     };
   }
@@ -224,6 +226,7 @@ export class TestService {
       answers: result.answers,
       score: result.score,
       completedAt: new Date(result.completed_at),
+      reviewedQuestions: result.reviewed_questions || [],
       detailedResults: result.detailed_results
     }));
   }

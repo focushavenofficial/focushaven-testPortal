@@ -264,6 +264,26 @@ const EditTest: React.FC<EditTestProps> = ({ test, onUpdateTest, onBack }) => {
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
+
+              <div>
+                <label htmlFor="questionSubject" className="block text-sm font-medium text-gray-700 mb-2">
+                  Question Subject
+                </label>
+                <select
+                  id="questionSubject"
+                  value={currentQuestion.subject || ''}
+                  onChange={(e) => setCurrentQuestion({ ...currentQuestion, subject: e.target.value })}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select Subject for Question</option>
+                  {subList.map(sub => (
+                    <option key={sub.code} value={sub.code}>{sub.name}</option>
+                  ))}
+                </select>
+                <p className="mt-1 text-sm text-gray-500">
+                  Assign a subject to this specific question (can be different from test subject)
+                </p>
+              </div>
               
               {currentQuestion.type === 'multiple-choice' && (
                 <div>
