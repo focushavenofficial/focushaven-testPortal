@@ -1,4 +1,4 @@
-borimport React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Test, Question, User } from '../types';
 import { Clock, ArrowLeft, ArrowRight, CheckCircle, AlertCircle, BookOpen, Eye, Save, Send } from 'lucide-react';
 import { getSubjectName } from '../constants/subjects';
@@ -217,7 +217,7 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, currentUser, on
               </div>
               
               <div className="flex items-center text-sm text-gray-600 bg-gray-100 px-3 py-1 border-2 rounded-xl border-blue-600 outline-offset-4">
-                <img src={generateIdenticon(currentUser.id)} className="size-10 mr-2 border-1 rounded-xl border-blue-100 " />
+                <img src={generateIdenticon(currentUser.id)} className="size-10 mr-2 border rounded-xl border-blue-100 " />
                 <span className="font-medium">{currentUser.name}</span>
               </div>
             </div>
