@@ -18,17 +18,6 @@ interface QuestionState {
 }
 
 
-generateIdenticon(seed: string): string {
-  const size = 100;
-  const svg = jdenticon.toSvg(seed, size);
-
-  // Encode SVG safely to a data URL
-  const encoded = encodeURIComponent(svg)
-    .replace(/'/g, "%27")
-    .replace(/"/g, "%22");
-
-  return `data:image/svg+xml,${encoded}`;
-}
 
 const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, onBack }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -94,6 +83,17 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, onBack }) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const generateIdenticon = (seed: string): string => {
+    const size = 100;
+    const svg = jdenticon.toSvg(seed, size);
+
+    const encoded = encodeURIComponent(svg)
+      .replace(/'/g, "%27")
+      .replace(/"/g, "%22");
+
+    return `data:image/svg+xml,${encoded}`;
   };
 
   generateIdenticon(seed: string): string {
