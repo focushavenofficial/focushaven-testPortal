@@ -53,26 +53,27 @@ const Dashboard: React.FC<DashboardProps> = ({
     const run = async () => {
       const [requests, myTests, allResults] = await Promise.all([
         TestService.getReviewRequests(user.role, user.id),
-        TestService.getTests('teacher', user.id),        // only your tests
-        TestService.getTestResults('teacher'),           // all results (service currently returns all)
+        TestService.getTests('teacher', user.id),
+        TestService.getTestResults('teacher'),
       ]);
-
+  
       const myTestIds = new Set(myTests.map(t => t.id));
       const resultIdToTestId = new Map(allResults.map(r => [r.id, r.testId]));
-
+  
       const pendingForMe = requests.filter(r => {
         if (r.status !== 'pending') return false;
         const testId = resultIdToTestId.get(r.testResultId);
         return myTestIds.has(testId);
       });
-
+  
       setPendingCount(pendingForMe.length);
     };
     run();
   }, [user.id, user.role]);
+  
+  fetchPendingRequests(); 
+  }, [user.role, user.id]); 
 
-  fetchPendingRequests();
-}, [user.role, user.id]);
 
   const formatDate = (date: Date) => {
     const options: Intl.DateTimeFormatOptions = {
