@@ -33,7 +33,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState<string | null>(null);
   const [subjectFilter, setSubjectFilter] = React.useState<string>('all');
   const [currentDateTime, setCurrentDateTime] = React.useState(new Date());
-  const [reviewRequestCount, setReviewRequestCount] = useState(0);
+  const [reviewRequestCount, setReviewRequestCount] = React.useState(0);
 
   // Update date/time every second
   React.useEffect(() => {
