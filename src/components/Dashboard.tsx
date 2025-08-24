@@ -49,30 +49,29 @@ const Dashboard: React.FC<DashboardProps> = ({
     window.location.reload();
   };
 
-  React.useEffect(() => {
-    const run = async () => {
-      const [requests, myTests, allResults] = await Promise.all([
-        TestService.getReviewRequests(user.role, user.id),
-        TestService.getTests('teacher', user.id),
-        TestService.getTestResults('teacher'),
-      ]);
-  
-      const myTestIds = new Set(myTests.map(t => t.id));
-      const resultIdToTestId = new Map(allResults.map(r => [r.id, r.testId]));
-  
-      const pendingForMe = requests.filter(r => {
-        if (r.status !== 'pending') return false;
-        const testId = resultIdToTestId.get(r.testResultId);
-        return myTestIds.has(testId);
-      });
-  
-      setPendingCount(pendingForMe.length);
-    };
-    run();
-  }, [user.id, user.role]);
-  
-  fetchPendingRequests(); 
-  }, [user.role, user.id]); 
+React.useEffect(() => {
+  const fetchPendingRequests = async () => {
+    const [requests, myTests, allResults] = await Promise.all([
+      TestService.getReviewRequests(user.role, user.id),
+      TestService.getTests('teacher', user.id),        
+      TestService.getTestResults('teacher'),           
+    ]);
+
+    const myTestIds = new Set(myTests.map(t => t.id));
+    const resultIdToTestId = new Map(allResults.map(r => [r.id, r.testId]));
+
+    const pendingForMe = requests.filter(r => {
+      if (r.status !== 'pending') return false;
+      const testId = resultIdToTestId.get(r.testResultId);
+      return myTestIds.has(testId);
+    });
+
+    setPendingCount(pendingForMe.length);
+  };
+
+  fetchPendingRequests(); // 👈 INSIDE useEffect
+}, [user.role, user.id]); // 👈 only ONE closing brace
+
 
 
   const formatDate = (date: Date) => {
