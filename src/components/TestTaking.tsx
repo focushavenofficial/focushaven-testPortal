@@ -19,7 +19,7 @@ interface QuestionState {
 
 
 
-const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, onBack }) => {
+const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, onBack, currentUser }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number | string>>({});
   const [reviewedQuestions, setReviewedQuestions] = useState<Set<string>>(new Set());
