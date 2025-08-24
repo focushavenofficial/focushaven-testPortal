@@ -17,6 +17,19 @@ interface QuestionState {
   selected: boolean;
 }
 
+
+generateIdenticon(seed: string): string {
+  const size = 100;
+  const svg = jdenticon.toSvg(seed, size);
+
+  // Encode SVG safely to a data URL
+  const encoded = encodeURIComponent(svg)
+    .replace(/'/g, "%27")
+    .replace(/"/g, "%22");
+
+  return `data:image/svg+xml,${encoded}`;
+}
+
 const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, onBack }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number | string>>({});
