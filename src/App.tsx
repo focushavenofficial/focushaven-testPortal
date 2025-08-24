@@ -231,8 +231,8 @@ function App() {
         <TestTaking
           test={selectedTest}
           onSubmit={handleSubmitTest}
-          currentUser={currentUser}
           onBack={() => setCurrentView('dashboard')}
+          currentUser={currentUser}
         />
       )}
       
