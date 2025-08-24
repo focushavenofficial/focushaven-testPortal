@@ -273,13 +273,13 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, currentUser, on
                     )}
                   </div>
                   <span className="text-sm text-gray-500">
-                    {Math.round(((getAnsweredCount() + reviewedQuestions.size) / filteredQuestions.length) * 100)}% Complete
+                    {Math.round(((getAnsweredCount()) / filteredQuestions.length) * 100)}% Complete
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${((getAnsweredCount() + reviewedQuestions.size) / filteredQuestions.length) * 100}%` }}
+                    style={{ width: `${((getAnsweredCount()) / filteredQuestions.length) * 100}%` }}
                   />
                 </div>
               </div>
