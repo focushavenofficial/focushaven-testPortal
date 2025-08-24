@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Test, Question } from '../types';
+import { Test, Question, User } from '../types';
 import { Clock, ArrowLeft, ArrowRight, CheckCircle, AlertCircle, User, BookOpen, Eye, Save, Send } from 'lucide-react';
 import { getSubjectName } from '../constants/subjects';
+import * as jdenticon from 'jdenticon';
 
 interface TestTakingProps {
   test: Test;
+  currentUser: User;
   onSubmit: (testId: string, answers: Record<string, number | string>, score: number, reviewedQuestions?: string[]) => void;
   onBack: () => void;
 }
@@ -80,6 +82,19 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, onBack }) => {
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
+
+  generateIdenticon(seed: string): string {
+  const size = 100;
+  const svg = jdenticon.toSvg(seed, size);
+
+  // Encode SVG safely to a data URL
+  const encoded = encodeURIComponent(svg)
+    .replace(/'/g, "%27")
+    .replace(/"/g, "%22");
+
+  return `data:image/svg+xml,${encoded}`;
+}
+
 
   const handleAnswerSelect = (questionId: string, answer: number | string) => {
     setAnswers(prev => ({
@@ -202,7 +217,7 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, onBack }) => {
               </div>
               
               <div className="flex items-center text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                <User className="h-4 w-4 mr-2" />
+                <img src={generateIdenticon(currentUser)} className="h-4 w-4 mr-2" />
                 <span className="font-medium">Student Name</span>
               </div>
             </div>
