@@ -7,7 +7,7 @@ import * as jdenticon from "jdenticon";
 interface TestTakingProps {
   test: Test;
   currentUser: User;
-  onSubmit: (testId: string, answers: Record<string, number | string>, score: number, reviewedQuestions?: string[]) => void;
+  onSubmit: (testId: string, answers: Record<string, number | string>, score: number, reviewedQuestions?: string[], startTime?: Date, timeSpent?: number) => void;
   onBack: () => void;
 }
 
@@ -27,6 +27,8 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, currentUser, on
   const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [questionStates, setQuestionStates] = useState<Record<string, QuestionState>>({});
+  const [testStartTime] = useState<Date>(new Date());
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   // Get unique subjects from test questions
   const subjects = Array.from(new Set(test.questions.map(q => q.subject).filter(Boolean)));
@@ -43,7 +45,9 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, currentUser, on
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-          handleSubmit();
+          if (!hasSubmitted) {
+            handleSubmit();
+          }
           return 0;
         }
         return prev - 1;
@@ -51,7 +55,34 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, currentUser, on
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [hasSubmitted]);
+
+  // Handle page unload/tab close
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!hasSubmitted) {
+        // Auto-submit the test
+        handleSubmit();
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden && !hasSubmitted) {
+        // Auto-submit when tab becomes hidden
+        handleSubmit();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [hasSubmitted, answers, reviewedQuestions]);
 
   // Initialize question states
   useEffect(() => {
@@ -157,8 +188,12 @@ const TestTaking: React.FC<TestTakingProps> = ({ test, onSubmit, currentUser, on
   };
 
   const handleSubmit = () => {
+    if (hasSubmitted) return;
+    
+    setHasSubmitted(true);
     const score = calculateScore();
-    onSubmit(test.id, answers, score, Array.from(reviewedQuestions));
+    const timeSpent = (test.duration * 60) - timeLeft;
+    onSubmit(test.id, answers, score, Array.from(reviewedQuestions), testStartTime, timeSpent);
   };
 
   const getAnsweredCount = () => {

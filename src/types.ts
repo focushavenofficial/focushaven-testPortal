@@ -38,6 +38,8 @@ export interface TestResult {
   answers: Record<string, number | string>; // Support both numeric and text answers
   score: number;
   completedAt: Date;
+  startedAt: Date;
+  timeSpent: number; // in seconds
   reviewedQuestions?: string[]; // Array of question IDs that were reviewed
   detailedResults?: {
     questionId: string;

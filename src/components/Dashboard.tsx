@@ -4,6 +4,44 @@ import { BookOpen, Plus, BarChart3, LogOut, Clock, Users, FileText, MoreVertical
 import { getSubjectName, subList } from '../constants/subjects';
 import { TestService } from '../services/testService';
 
+const TestStartButton: React.FC<{ test: Test; onStartTest: (test: Test) => void; userId: string }> = ({ test, onStartTest, userId }) => {
+  const [hasTaken, setHasTaken] = React.useState<boolean | null>(null);
+
+  React.useEffect(() => {
+    TestService.hasUserTakenTest(userId, test.id).then(setHasTaken);
+  }, [userId, test.id]);
+
+  if (hasTaken === null) {
+    return (
+      <button
+        disabled
+        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-400 bg-gray-200 cursor-not-allowed"
+      >
+        Loading...
+      </button>
+    );
+  }
+
+  if (hasTaken) {
+    return (
+      <button
+        disabled
+        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-500 bg-gray-200 cursor-not-allowed"
+      >
+        Already Taken
+      </button>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => onStartTest(test)}
+      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
+    >
+      Start Test
+    </button>
+  );
+};
 interface DashboardProps {
   user: User;
   tests: Test[];
@@ -356,12 +394,7 @@ React.useEffect(() => {
                     
                     <div className="flex items-center space-x-2">
                       {user.role === 'student' && test.isActive && (
-                        <button
-                          onClick={() => onStartTest(test)}
-                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
-                        >
-                          Start Test
-                        </button>
+                        <TestStartButton test={test} onStartTest={onStartTest} userId={user.id} />
                       )}
                       
                       {(user.role === 'admin' || (user.role === 'teacher' && test.createdBy === user.id)) && (

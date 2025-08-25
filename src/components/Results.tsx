@@ -239,7 +239,7 @@ const Results: React.FC<ResultsProps> = ({ results, tests, currentUser, onBack, 
                               className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                             >
                               <Eye className="h-3 w-3 mr-1" />
-                              Review
+                              {currentUser.role === 'student' ? 'View Report' : 'Review'}
                             </button>
                           </td>
                         </tr>

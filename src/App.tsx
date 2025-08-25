@@ -10,16 +10,18 @@ import EditTest from './components/EditTest';
 import { User, Test, TestResult } from './types';
 import { TestService } from './services/testService';
 import { AstraAuthService } from './services/astraAuthService';
+import TestReport from './components/TestReport';
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'test' | 'create' | 'edit' | 'results' | 'review' | 'review-requests'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'test' | 'create' | 'edit' | 'results' | 'review' | 'review-requests' | 'report'>('dashboard');
   const [selectedTest, setSelectedTest] = useState<Test | null>(null);
   const [selectedResult, setSelectedResult] = useState<TestResult | null>(null);
   const [tests, setTests] = useState<Test[]>([]);
   const [results, setResults] = useState<TestResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showTestSubmissionMessage, setShowTestSubmissionMessage] = useState(false);
 
   // Load data when user logs in
   useEffect(() => {
@@ -107,11 +109,18 @@ function App() {
     setCurrentView('edit');
   };
   const handleStartTest = (test: Test) => {
-    setSelectedTest(test);
-    setCurrentView('test');
+    // Check if user has already taken this test
+    TestService.hasUserTakenTest(currentUser!.id, test.id).then(hasTaken => {
+      if (hasTaken) {
+        setError('You have already taken this test. Each test can only be attempted once.');
+        return;
+      }
+      setSelectedTest(test);
+      setCurrentView('test');
+    });
   };
 
-  const handleSubmitTest = async (testId: string, answers: Record<string, number | string>, score: number, reviewedQuestions?: string[]) => {
+  const handleSubmitTest = async (testId: string, answers: Record<string, number | string>, score: number, reviewedQuestions?: string[], startTime?: Date, timeSpent?: number) => {
     if (!currentUser) return;
     
     setLoading(true);
@@ -126,12 +135,23 @@ function App() {
         userId: currentUser.id,
         answers,
         score,
-        reviewedQuestions: reviewedQuestions || []
+        reviewedQuestions: reviewedQuestions || [],
+        startedAt: startTime || new Date(),
+        timeSpent: timeSpent || 0
       }, test);
       
       setResults(prev => [result, ...prev]);
-      setCurrentView('results');
       setSelectedTest(null);
+      
+      // Show submission message
+      setShowTestSubmissionMessage(true);
+      
+      // Auto-logout after test submission
+      setTimeout(() => {
+        setShowTestSubmissionMessage(false);
+        handleLogout();
+      }, 3000);
+      
     } catch (err) {
       console.error('Error submitting test:', err);
       setError('Failed to submit test. Please try again.');
@@ -142,7 +162,11 @@ function App() {
 
   const handleViewResult = (result: TestResult) => {
     setSelectedResult(result);
-    setCurrentView('review');
+    if (currentUser?.role === 'student') {
+      setCurrentView('report');
+    } else {
+      setCurrentView('review');
+    }
   };
 
   const handleUpdateTest = async (testId: string, updates: Partial<Test>) => {
@@ -196,6 +220,24 @@ function App() {
   }
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Test Submission Success Message */}
+      {showTestSubmissionMessage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+            <div className="mb-4">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Test Submitted Successfully!</h3>
+            <p className="text-gray-600 mb-4">Your test has been submitted and scored. You will be logged out shortly.</p>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600 mx-auto"></div>
+          </div>
+        </div>
+      )}
+      
       {error && (
         <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
           <div className="flex">
@@ -275,6 +317,15 @@ function App() {
         <ReviewRequests
           currentUser={currentUser}
           onBack={() => setCurrentView('dashboard')}
+        />
+      )}
+      
+      {currentView === 'report' && selectedResult && (
+        <TestReport
+          result={selectedResult}
+          test={tests.find(t => t.id === selectedResult.testId)!}
+          currentUser={currentUser}
+          onBack={() => setCurrentView('results')}
         />
       )}
     </div>

@@ -110,6 +110,18 @@ export class TestService {
   }
 
   static async submitTestResult(result: Omit<TestResult, 'id' | 'completedAt'>, test: Test): Promise<TestResult> {
+    // Check if user has already taken this test
+    const { data: existingResult, error: checkError } = await supabase
+      .from('test_results')
+      .select('id')
+      .eq('test_id', result.testId)
+      .eq('user_id', result.userId)
+      .single();
+
+    if (existingResult) {
+      throw new Error('You have already taken this test. Each test can only be attempted once.');
+    }
+
     // Calculate detailed results with AI checking for text answers
     const detailedResults = await Promise.all(
       test.questions.map(async (question) => {
@@ -176,7 +188,9 @@ export class TestService {
         user_id: result.userId,
         answers: result.answers,
         score: calculatedScore,
-        reviewed_questions: result.reviewedQuestions || []
+        reviewed_questions: result.reviewedQuestions || [],
+        started_at: result.startedAt.toISOString(),
+        time_spent: result.timeSpent
       })
       .select()
       .single();
@@ -201,11 +215,27 @@ export class TestService {
       answers: data.answers,
       score: data.score,
       completedAt: new Date(data.completed_at),
+      startedAt: new Date(data.started_at),
+      timeSpent: data.time_spent,
       reviewedQuestions: data.reviewed_questions || [],
       detailedResults: detailedResults
     };
   }
 
+  static async hasUserTakenTest(userId: string, testId: string): Promise<boolean> {
+    try {
+      const { data, error } = await supabase
+        .from('test_results')
+        .select('id')
+        .eq('test_id', testId)
+        .eq('user_id', userId)
+        .single();
+
+      return !!data;
+    } catch (error) {
+      return false;
+    }
+  }
   static async getTestResults(userRole: string, userId?: string): Promise<TestResult[]> {
     let query = supabase.from('test_results').select('*');
 
@@ -226,6 +256,8 @@ export class TestService {
       answers: result.answers,
       score: result.score,
       completedAt: new Date(result.completed_at),
+      startedAt: new Date(result.started_at || result.completed_at),
+      timeSpent: result.time_spent || 0,
       reviewedQuestions: result.reviewed_questions || [],
       detailedResults: result.detailed_results
     }));
