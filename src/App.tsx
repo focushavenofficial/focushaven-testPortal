@@ -14,7 +14,6 @@ import TestReport from './components/TestReport';
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'test' | 'create' | 'edit' | 'results' | 'review' | 'review-requests' | 'report'>('dashboard');
   const [currentView, setCurrentView] = useState<'dashboard' | 'test' | 'create' | 'edit' | 'results' | 'review' | 'review-requests' | 'report' | 'analyze'>('dashboard');
   const [selectedTest, setSelectedTest] = useState<Test | null>(null);
   const [selectedResult, setSelectedResult] = useState<TestResult | null>(null);
