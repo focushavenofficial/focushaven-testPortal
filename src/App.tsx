@@ -15,6 +15,7 @@ import TestReport from './components/TestReport';
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentView, setCurrentView] = useState<'dashboard' | 'test' | 'create' | 'edit' | 'results' | 'review' | 'review-requests' | 'report'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'test' | 'create' | 'edit' | 'results' | 'review' | 'review-requests' | 'report' | 'analyze'>('dashboard');
   const [selectedTest, setSelectedTest] = useState<Test | null>(null);
   const [selectedResult, setSelectedResult] = useState<TestResult | null>(null);
   const [tests, setTests] = useState<Test[]>([]);
@@ -162,11 +163,17 @@ function App() {
 
   const handleViewResult = (result: TestResult) => {
     setSelectedResult(result);
-    if (currentUser?.role === 'student') {
-      setCurrentView('report');
-    } else {
-      setCurrentView('review');
-    }
+    setCurrentView('review');
+  };
+
+  const handleViewReport = (result: TestResult) => {
+    setSelectedResult(result);
+    setCurrentView('report');
+  };
+
+  const handleAnalyzeResult = (result: TestResult) => {
+    setSelectedResult(result);
+    setCurrentView('analyze');
   };
 
   const handleUpdateTest = async (testId: string, updates: Partial<Test>) => {
@@ -301,6 +308,8 @@ function App() {
           currentUser={currentUser}
           onBack={() => setCurrentView('dashboard')}
           onViewResult={handleViewResult}
+          onViewReport={handleViewReport}
+          onAnalyzeResult={handleAnalyzeResult}
         />
       )}
       
@@ -322,6 +331,15 @@ function App() {
       
       {currentView === 'report' && selectedResult && (
         <TestReport
+          result={selectedResult}
+          test={tests.find(t => t.id === selectedResult.testId)!}
+          currentUser={currentUser}
+          onBack={() => setCurrentView('results')}
+        />
+      )}
+      
+      {currentView === 'analyze' && selectedResult && (
+        <TestReview
           result={selectedResult}
           test={tests.find(t => t.id === selectedResult.testId)!}
           currentUser={currentUser}

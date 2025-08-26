@@ -8,9 +8,11 @@ interface ResultsProps {
   currentUser: User;
   onBack: () => void;
   onViewResult: (result: TestResult) => void;
+  onViewReport?: (result: TestResult) => void;
+  onAnalyzeResult?: (result: TestResult) => void;
 }
 
-const Results: React.FC<ResultsProps> = ({ results, tests, currentUser, onBack, onViewResult }) => {
+const Results: React.FC<ResultsProps> = ({ results, tests, currentUser, onBack, onViewResult, onViewReport, onAnalyzeResult }) => {
   const [selectedTest, setSelectedTest] = useState<string>('all');
 
   const filteredResults = selectedTest === 'all' 
@@ -239,8 +241,26 @@ const Results: React.FC<ResultsProps> = ({ results, tests, currentUser, onBack, 
                               className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                             >
                               <Eye className="h-3 w-3 mr-1" />
-                              {currentUser.role === 'student' ? 'View Report' : 'Review'}
+                              Review
                             </button>
+                            {currentUser.role === 'student' && onViewReport && (
+                              <button
+                                onClick={() => onViewReport(result)}
+                                className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors ml-2"
+                              >
+                                <Eye className="h-3 w-3 mr-1" />
+                                View Report
+                              </button>
+                            )}
+                            {currentUser.role === 'student' && onAnalyzeResult && (
+                              <button
+                                onClick={() => onAnalyzeResult(result)}
+                                className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-purple-700 bg-purple-100 hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors ml-2"
+                              >
+                                <Eye className="h-3 w-3 mr-1" />
+                                Analyze
+                              </button>
+                            )}
                           </td>
                         </tr>
                       );
