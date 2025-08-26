@@ -201,7 +201,7 @@ const TestReport: React.FC<TestReportProps> = ({ result, test, currentUser, onBa
             </div>
             <button
               onClick={generatePDF}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               <Download className="h-4 w-4 mr-2" />
               Download PDF
@@ -215,7 +215,7 @@ const TestReport: React.FC<TestReportProps> = ({ result, test, currentUser, onBa
         {/* Header Card */}
         <div className="bg-white rounded-lg shadow-sm p-8 mb-6 text-center">
           <div className="mb-4">
-            <FileText className="h-16 w-16 text-blue-600 mx-auto mb-4" />
+            <FileText className="h-16 w-16 text-amber-600 mx-auto mb-4" />
             <h2 className="text-3xl font-bold text-gray-900">FOCUS HAVEN</h2>
             <p className="text-lg text-gray-600 mt-2">Test Portal Report</p>
           </div>
@@ -234,7 +234,7 @@ const TestReport: React.FC<TestReportProps> = ({ result, test, currentUser, onBa
         {/* Student Information */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-            <Award className="h-5 w-5 mr-2 text-blue-600" />
+            <Award className="h-5 w-5 mr-2 text-amber-600" />
             Student Information
           </h3>
           
@@ -277,7 +277,7 @@ const TestReport: React.FC<TestReportProps> = ({ result, test, currentUser, onBa
         {/* Test Results Table */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-            <Target className="h-5 w-5 mr-2 text-blue-600" />
+            <Target className="h-5 w-5 mr-2 text-amber-600" />
             Test Results
           </h3>
           
@@ -358,7 +358,7 @@ const TestReport: React.FC<TestReportProps> = ({ result, test, currentUser, onBa
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Performance Analysis</h3>
           
-          <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+          <div className="bg-blue-50 border-l-4 border-amber-400 p-4 rounded-r-lg">
             <p className="text-gray-700">
               {result.score >= 90 ? '🎉 Excellent performance! You have demonstrated outstanding knowledge and understanding of the subject matter.' :
                result.score >= 80 ? '👍 Very good performance! You have shown strong understanding with minor areas for improvement.' :
