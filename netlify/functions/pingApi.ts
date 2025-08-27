@@ -28,9 +28,16 @@ const handler: Handler = async () => {
     });
 
     const data = await response.json();
-
-    // Log or process both responses
     console.log("Focus Haven API Response:", data);
+
+    //Ping AFKBot
+    console.log("Pinging AFK BOT Server API...");
+    const BotResponce = await fetch("https://minecraft-afkbot-q3to.onrender.com/start-bot", {
+      method: "GET"
+    })
+
+    const botData = await BotResponce.json();
+    console.log("BOT API resopnse: ",BotData);
 
     return {
       statusCode: 200,
@@ -40,7 +47,8 @@ const handler: Handler = async () => {
           status: supabaseResponse.status,
           statusText: supabaseResponse.statusText
         },
-        focusHavenApi: data 
+        focusHavenApi: data ,
+        botApi: botData
       }),
     };
   } catch (error) {
