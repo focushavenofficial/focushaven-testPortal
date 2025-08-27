@@ -37,7 +37,7 @@ const handler: Handler = async () => {
     })
 
     const botData = await BotResponce.json();
-    console.log("BOT API resopnse: ",BotData);
+    console.log("BOT API resopnse: ",botData);
 
     return {
       statusCode: 200,
