@@ -128,39 +128,28 @@ export class TestService {
         const userAnswer = result.answers[question.id];
         let isCorrect = false;
         let similarityScore: number | undefined;
-        let marksAwarded = 0;
-        const totalMarks = question.marks || 1;
+        let marksAwarded = 0; // Will be calculated based on new scoring system
 
         if (question.type === 'multiple-choice' || question.type === 'true-false') {
           if (userAnswer === question.correctAnswer) {
             isCorrect = true;
-            marksAwarded = totalMarks;
+            marksAwarded = 4; // +4 for correct answer
           }
         } else if (question.type === 'short-answer' || question.type === 'fill-in-blank') {
           if (question.expectedAnswer && typeof userAnswer === 'string') {
             similarityScore = await AIService.checkSimilarity(userAnswer, question.expectedAnswer);
             isCorrect = await AIService.isAnswerCorrect(userAnswer, question.expectedAnswer);
             
-            // Award marks based on similarity score for short answer questions
-            if (question.type === 'short-answer' && similarityScore !== undefined) {
-              if (similarityScore >= 0.9) {
-                marksAwarded = totalMarks;
-              } else if (similarityScore >= 0.7) {
-                marksAwarded = Math.round(totalMarks * 0.75);
-              } else if (similarityScore >= 0.5) {
-                marksAwarded = Math.round(totalMarks * 0.5);
-              } else if (similarityScore >= 0.3) {
-                marksAwarded = Math.round(totalMarks * 0.25);
-              }
-            } else if (isCorrect) {
-              marksAwarded = totalMarks;
+            // New scoring system: +4 for correct, 0 for incorrect (will be -1 in final calculation)
+            if (isCorrect) {
+              marksAwarded = 4;
             }
           }
         } else if (question.type === 'real-number') {
           if (question.correctNumber !== undefined && typeof userAnswer === 'string') {
             if (AIService.checkRealNumber(userAnswer, question.correctNumber)) {
               isCorrect = true;
-              marksAwarded = totalMarks;
+              marksAwarded = 4; // +4 for correct answer
             }
           }
         }
@@ -176,10 +165,16 @@ export class TestService {
       })
     );
 
-    // Calculate score based on marks awarded
-    const totalMarksAwarded = detailedResults.reduce((sum, r) => sum + (r.marksAwarded || 0), 0);
-    const totalPossibleMarks = test.questions.reduce((sum, q) => sum + (q.marks || 1), 0);
-    const calculatedScore = Math.round((totalMarksAwarded / totalPossibleMarks) * 100);
+    // Calculate score using new scoring system: +4 for correct, -1 for incorrect
+    const correctAnswers = detailedResults.filter(r => r.isCorrect).length;
+    const attemptedAnswers = Object.keys(result.answers).filter(key => 
+      result.answers[key] !== undefined && result.answers[key] !== ''
+    ).length;
+    const incorrectAnswers = attemptedAnswers - correctAnswers;
+    
+    const totalMarksAwarded = (correctAnswers * 4) - (incorrectAnswers * 1);
+    const totalPossibleMarks = test.questions.length * 4;
+    const calculatedScore = totalPossibleMarks > 0 ? Math.round((totalMarksAwarded / totalPossibleMarks) * 100) : 0;
 
     const { data, error } = await supabase
       .from('test_results')
